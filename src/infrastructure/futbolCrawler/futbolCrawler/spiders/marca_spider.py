@@ -44,7 +44,6 @@ class MarcaSpider(scrapy.Spider):
 
         yield {
             'liga': liga,
-            'equipo': equipo.strip() if equipo else 'Genérico',
             'titular': titulo.strip() if titulo else None,
             'url': response.url,
             'texto_noticia': noticia_final.strip()
