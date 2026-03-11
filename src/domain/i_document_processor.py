@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from document import Document
+from domain.document import Document
 
 class IDocumentProcessor(ABC):
     @abstractmethod
