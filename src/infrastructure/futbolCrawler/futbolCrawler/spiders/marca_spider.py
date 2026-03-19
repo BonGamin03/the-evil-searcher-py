@@ -40,8 +40,7 @@ class MarcaSpider(scrapy.Spider):
          
         cuerpo_completo = " ".join(texto_limpio)
         noticia_final = f"{entradilla} {cuerpo_completo}" if entradilla else cuerpo_completo
-        equipo = response.css('.ue-c-article__kicker::text').get()
-
+       
         yield {
             'liga': liga,
             'titular': titulo.strip() if titulo else None,
