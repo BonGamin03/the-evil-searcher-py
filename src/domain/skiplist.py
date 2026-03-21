@@ -1,10 +1,11 @@
 import random
-from typing import List,Optional
+from typing import Any, List, Optional, Tuple
 class Node:
  
 
-    def __init__(self, val):
+    def __init__(self, val, freq: int = 0):
         self.val    = val
+        self.freq   = freq
         self.prev   = None      
         self.next   = None       
         self.top    = None     
@@ -28,7 +29,7 @@ class SkipList:
         self.size           = 0   
 
     
-    def search(self, root: Optional[Node], target: int) -> bool:
+    def search(self, root: Optional[Node], target: Any) -> bool:
         """
         Find `target` starting on `root`.
         """
@@ -51,6 +52,25 @@ class SkipList:
             c = c.bottom
 
         return False
+
+    def _update_existing_freq(self, val: Any, freq: int) -> bool:
+        """Update freq for an existing value across all levels.
+
+        Returns True if the value was found and updated.
+        """
+        c = self.head
+        updated = False
+        while c is not None:
+            while c.next is not None and c.next.val < val:
+                c = c.next
+
+            if c.next is not None and c.next.val == val:
+                c.next.freq = freq
+                updated = True
+
+            c = c.bottom
+
+        return updated
     
     def _random_level(self) -> int:
         """
@@ -62,13 +82,14 @@ class SkipList:
             level += 1
         return level
 
-    def insert(self, val: int) -> None:
+    def insert(self, val: Any, freq: int = 1) -> None:
         """
         Inser `val` order.
  
         """
         if self.search(self.head, val):
-            return  
+            self._update_existing_freq(val, freq)
+            return
 
         # Build the search path (predecessors) from top level down to base level.
         # update[0] is top-level predecessor; update[-1] is base-level predecessor.
@@ -110,7 +131,7 @@ class SkipList:
             pred = update[-level_offset]
             succ = pred.next
 
-            new_node = Node(val)
+            new_node = Node(val, freq=freq)
             new_node.prev = pred
             new_node.next = succ
             pred.next = new_node
@@ -145,14 +166,24 @@ class SkipList:
         end = float('+inf')
 
         while p1.val != end:
-            
-            if other.search(other.head, p1.val):
-                result.insert(p1.val)
+            # Buscar p1.val en `other` usando la búsqueda multinivel
+            intersect_node=other.search(other.head, p1.val)
+            if intersect_node:
+                result.insert(p1.val,p1.freq+intersect_node.freq)
             p1 = p1.next
 
         return result
+
+    def to_postings(self) -> List[Tuple[Any, int]]:
+        """Return base-level postings as (val, freq) pairs."""
+        result: List[Tuple[Any, int]] = []
+        c = self._base_level_head().next
+        while c is not None and c.val != float('+inf'):
+            result.append((c.val, c.freq))
+            c = c.next
+        return result
     
-    def to_list(self) -> List[int]:
+    def to_list(self) -> List[Any]:
         """Devuelve todos los valores en orden ascendente desde el nivel base."""
         result = []
         c = self._base_level_head().next
