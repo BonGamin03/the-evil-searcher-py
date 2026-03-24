@@ -12,7 +12,7 @@ class Document:
         content: str. Full News content
         
     """
-    id:str
+    id:int
     title:str
     league:str
     url:str
