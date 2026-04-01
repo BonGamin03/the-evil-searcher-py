@@ -7,6 +7,7 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
+import os
 BOT_NAME = "futbolCrawler"
 
 SPIDER_MODULES = ["futbolCrawler.spiders"]
@@ -73,7 +74,16 @@ DEFAULT_REQUEST_HEADERS = {
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    "futbolCrawler.pipelines.FutbolcrawlerPipeline": 300,
+      "futbolCrawler.pipelines.MongoStorePipeline": 400,
 }
+
+
+
+MONGO_URI = os.getenv(
+    "MONGO_URI",
+    "mongodb://admin:admin@localhost:27017/evil_searcher?authSource=admin",
+)
+MONGO_DATABASE = os.getenv("MONGO_DATABASE", "evil_searcher")
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
