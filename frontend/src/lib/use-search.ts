@@ -24,13 +24,13 @@ export function useSearch() {
     setHasSearched(true);
 
     try {
-      console.log("Performing search for query:", query);
-      const response = await axios.get(`http://localhost:8000/search?q=${encodeURIComponent(query)}`);
-      setResults(response.data);
+      
+      //const response = await axios.get(`http://localhost:8000/search?q=${encodeURIComponent(query)}`);
+      //setResults(response.data);
     } catch (err) {
       console.error("Search error:", err);
       setError("Failed to fetch results. Please try again.");
-      setResults([]); // Limpiar resultados previos en caso de error
+      setResults([]);  
     } finally {
       setIsLoading(false);
     }
