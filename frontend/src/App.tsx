@@ -5,14 +5,13 @@ import { Footer } from "./components/footer"
 import { Header } from "./components/header"
 import { useState } from "react"
 import { Results } from "./components/results"
+import { useSearch } from "./lib/use-search"
 
 function App() {
-  const [hasSearched, setHasSearched] = useState(false)
+   const { results, isLoading, hasSearched, error, performSearch } = useSearch();
 
-  // Función para simular la búsqueda
-  const handleSearch = () => {
-    setHasSearched(true)
-  }
+  
+   
   
 return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -37,11 +36,25 @@ return (
             
             {/* Pasamos la función de búsqueda al componente Search */}
             <div className={`w-full transition-all duration-300 ${hasSearched ? 'mb-8 max-w-3xl' : 'mb-8'}`}>
-              <Search onSearch={handleSearch} />
+              <Search onSearch={performSearch} isLoading={isLoading} />
             </div>
+              {error && (
+              <div className="p-4 mb-6 text-sm text-destructive bg-destructive/10 rounded-lg border border-destructive/20">
+                {error}
+              </div>
+            )}
+              {hasSearched && !isLoading && !error && (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <Results data={results} />
+              </div>
+            )}
 
-            {/* Mostrar resultados solo si se ha buscado */}
-            {hasSearched && <Results />}
+            {isLoading && (
+              <div className="flex flex-col items-center justify-center mt-20 gap-4 text-muted-foreground animate-pulse">
+                <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                <p>Summoning results...</p>
+              </div>
+            )}
           </div>
         </main>
 

@@ -35,7 +35,7 @@ const mockResults: SearchResult[] = [
   }
 ];
 
-export function Results() {
+export function Results({data:SearchResult}) {
   return (
     <div className="w-full max-w-3xl flex flex-col gap-8 pb-20">
       {/* Resumen de resultados */}
