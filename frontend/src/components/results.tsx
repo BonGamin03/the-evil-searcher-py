@@ -8,8 +8,11 @@ interface SearchResult {
   description: string;
   date?: string;
 }
+interface ResultsProps {
+  data: SearchResult[];
+}
 
-const mockResults: SearchResult[] = [
+const data: SearchResult[] = [
   {
     id: "1",
     title: "How to survive the Evil Searcher - Tutorial",
@@ -35,17 +38,17 @@ const mockResults: SearchResult[] = [
   }
 ];
 
-export function Results({data:SearchResult}) {
+export function Results({data}: ResultsProps) {
   return (
     <div className="w-full max-w-3xl flex flex-col gap-8 pb-20">
       {/* Resumen de resultados */}
       <p className="text-sm text-muted-foreground px-1">
-        About {mockResults.length} results (0.42 seconds)
+        About {data.length} results (0.42 seconds)
       </p>
 
       {/* Lista de resultados */}
       <div className="flex flex-col gap-10">
-        {mockResults.map((result) => (
+        {data.map((result) => (
           <div key={result.id} className="group flex flex-col gap-1">
             {/* Meta info / URL */}
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
