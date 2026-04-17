@@ -15,6 +15,6 @@ class IVectorRepository(ABC):
     @abstractmethod
     def query(self,query_embedding: list[float],k: int = 10,
         where: dict[str, Any] | None = None,
-    ) -> list[tuple[int, float]]:
+    ) -> list[int]:
         """Query the vector store for the most similar embeddings to the query_embedding"""
         pass
