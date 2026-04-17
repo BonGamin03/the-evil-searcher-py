@@ -12,15 +12,14 @@ class ChromaVectorRepository(IVectorRepository):
         self._collection.upsert(
             ids=[str(doc_id)],
             embeddings=[embedding],
-            metadatas=[metadata or {}],
         )
 
-    def query(self, query_embedding: list[float], k=10, where=None) -> list[tuple[int, float]]:
+    def query(self, query_embedding: list[float], k=10, where=None) -> list[int]:
         res = self._collection.query(
             query_embeddings=[query_embedding],
             n_results=k,
-            where=where,
-            include=["distances"],
         )
-        # falta score y proceso que dependen del embedding y la norma
-        ...
+        return res["ids"][0] # Esto es porque res["ids"] es una lista de listas, y queremos la primera lista que corresponde a nuestra consulta
+    
+    def delete(self, doc_id):
+        return super().delete(doc_id)

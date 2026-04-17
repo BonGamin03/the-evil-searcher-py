@@ -1,2 +1,7 @@
 .venv/
+searcherenv/
+**/chroma_data/
+**/lsaModel/
+**/*.joblib
+**/__pycache__/
 .env
