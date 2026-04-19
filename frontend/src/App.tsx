@@ -6,6 +6,7 @@ import { Header } from "./components/header"
 import { Results } from "./components/results"
 import { useSearch } from "./lib/use-search"
 import { Loading } from "./components/loading"
+import { AIInformation } from "./components/ai-information"
 
 function App() {
    const { results, isLoading, hasSearched, error, performSearch } = useSearch();
@@ -50,7 +51,8 @@ return (
             ) : (
               hasSearched && !error && (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <Results data={results} />
+                  {results.aiResponse && <AIInformation content={results.aiResponse} />}
+                  <Results data={results.items} />
                 </div>
               )
             )}
