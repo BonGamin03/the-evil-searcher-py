@@ -12,33 +12,7 @@ interface ResultsProps {
   data: SearchResult[];
 }
 
-const data: SearchResult[] = [
-  {
-    id: "1",
-    title: "How to survive the Evil Searcher - Tutorial",
-    url: "https://example.com/survive-evil",
-    displayUrl: "https://example.com › survive-evil",
-    description: "Learn the basic steps to navigate through the dark web of the Evil Searcher. Don't let the algorithms catch you off guard.",
-    date: "2 hours ago"
-  },
-  {
-    id: "2",
-    title: "The dark arts of SEO in 2024",
-    url: "https://evil-seo.org/blog",
-    displayUrl: "https://evil-seo.org › blog",
-    description: "Mastering the search results requires more than just keywords. Discover the hidden patterns used by the Evil Searcher to rank content.",
-    date: "May 12, 2024"
-  },
-  {
-    id: "3",
-    title: "GitHub - the-evil-searcher-py: A python based engine",
-    url: "https://github.com/daniel/the-evil-searcher-py",
-    displayUrl: "https://github.com › daniel › the-evil-searcher-py",
-    description: "Official repository for the Evil Searcher project. Built with Python and React for maximum efficiency and speed.",
-  }
-];
-
-export function Results({data}: ResultsProps) {
+ export function Results({data}: ResultsProps) {
   return (
     <div className="w-full max-w-3xl flex flex-col gap-8 pb-20">
       {/* Resumen de resultados */}
