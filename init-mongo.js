@@ -15,7 +15,7 @@ db.createCollection("documents", {
         title: { bsonType: "string" },
         league: { bsonType: "string" },
         url: { bsonType: "string" },
-        content: { bsonType: "string" }
+        content: { bsonType: "array" , items : { bsonType: "string" } }
       },
       additionalProperties: true
     }

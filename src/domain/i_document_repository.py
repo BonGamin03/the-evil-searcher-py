@@ -3,7 +3,7 @@ from domain.document  import Document
 
 class IDocumentRepository(ABC):
     @abstractmethod
-    def save_document(self,title:str,league:str,url:str,content:str) -> int:
+    def save_document(self,title:str,league:str,url:str,content:list) -> int:
         pass
 
     @abstractmethod

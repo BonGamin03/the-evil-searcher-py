@@ -21,7 +21,7 @@ class DocumentRepository(IDocumentRepository):
         doc = self.db.documents.find_one({"url": url}, {"doc_id": 1})
         return int(doc["doc_id"]) if doc and "doc_id" in doc else None
 
-    def save_document(self, title: str, league: str, url: str, content: str) -> int:
+    def save_document(self, title: str, league: str, url: str, content: list) -> int:
         existing = self._get_doc_id_by_url(url)
         if existing:
             return existing

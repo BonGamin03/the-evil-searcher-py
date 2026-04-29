@@ -16,7 +16,7 @@ class Document:
     title:str
     league:str
     url:str
-    content:str
+    content: list
 
     def get_full_text(self) -> str:
         """
@@ -25,7 +25,9 @@ class Document:
         Returns:
             str. full text
         """
-        return f"{self.title} {self.league} {self.content}"
+        content_text = "\n".join(self.content) 
+        
+        return f"{self.title} {self.league}\n{content_text}"
     
     def get_word_count(self) -> int:
         """

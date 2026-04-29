@@ -48,15 +48,14 @@ class TudnSpider(scrapy.Spider):
 
                 if len(texto_parrafo) > 10:
                     texto_limpio.append(texto_parrafo)
-        
-        cuerpo_completo = " ".join(texto_limpio)
-        noticia_final = f"{entradilla} {cuerpo_completo}" if entradilla else cuerpo_completo
-        
+        if entradilla:
+            texto_limpio.insert(0, entradilla.strip())
+
         # Condicion para filtar noticias poco documentadas y anuncios 
-        if len(cuerpo_completo) > 100:
+        if len(texto_limpio) > 2:
             yield {
                 'liga': liga,
                 'titular': titulo.strip() if titulo else None,
                 'url': response.url,
-                'texto_noticia': noticia_final.strip()
+                'texto_noticia': texto_limpio
             }

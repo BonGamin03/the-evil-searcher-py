@@ -6,7 +6,7 @@ from domain.document import Document
 from domain.i_embedding_generator import IEmbeddingGenerator
 
 class LSAEmbeddingGenerator(IEmbeddingGenerator):
-    def __init__(self, documents: list[Document], n_components: int = 100): #hay que ver cual es la cantidad de componentes ideales 
+    def __init__(self, documents: list[Document], n_components: int = 200): #hay que ver cual es la cantidad de componentes ideales 
         self.model_path = "./lsaModel"
         self.vectorizer_file = os.path.join(self.model_path, "vectorizer.joblib")
         self.svd_file = os.path.join(self.model_path, "svd.joblib")
