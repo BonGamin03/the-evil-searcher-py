@@ -10,8 +10,11 @@ class LoadEmbeddingsUseCase:
     def execute(self):
         documents = self.document_repository.get_all_documents()
         for doc in documents:
-            embedding = self.embedding_generator.document_to_embedding(doc)
-            self.vector_repository.upsert(doc.id, embedding)
+            i=0
+            for chunk in doc.content:
+                embedding = self.embedding_generator.text_to_embedding(chunk)
+                self.vector_repository.upsert(doc.id, i, embedding)
+                i+=1
     
 
         

@@ -9,6 +9,7 @@ from infrastructure.vector_repository import ChromaVectorRepository
 from infrastructure.lsa_embedding_generator import LSAEmbeddingGenerator
 from application.show_results_use_case import ShowResultsUseCase
 from application.load_embedings_use_case import LoadEmbeddingsUseCase
+from infrastructure.meta_llama_rag import MetaLLamaRAG
 
 def main():
     print("Conectando a MongoDB...")
@@ -25,23 +26,37 @@ def main():
     documents=document_repo.get_all_documents()
     embedding=LSAEmbeddingGenerator(documents)
     generator=LoadEmbeddingsUseCase(document_repo,embedding,vector_repo)
+    rag_model = MetaLLamaRAG()
     generator.execute()
-    queryObj=ShowResultsUseCase(document_repo,vector_repo,embedding)
+    queryObj=ShowResultsUseCase(document_repo,vector_repo,embedding,rag_model)
     print("Inicializando caso de uso de búsqueda...")
-     
-    
-    query = "CR7"
-    print(f"\nEjecutando búsqueda para la query: '{query}'\n")
-    # Al estar definido como 'async def execute', usamos await
-    results = queryObj.execute(query)
-    
-    if not results:
-        print("No se encontraron resultados.")
-    else:
-        print(f"Se encontraron {len(results)} resultados:")
-        for idx, doc in enumerate(results, 1):
-            print(f"{idx}. [{doc.league}] {doc.title}")
-            print(f"   URL: {doc.url}\n")
+    while True:
+        print("\n" + "="*50)
+        query = input("Introduce tu búsqueda (o escribe 'salir' para terminar): ").strip()
+        
+        if query.lower() in ['salir', 'exit', 'quit']:
+            print("Saliendo del buscador...")
+            break
+            
+        if not query:
+            continue
+
+        print(f"\nEjecutando búsqueda para la query: '{query}'\n")
+        
+        # Desempaquetamos los documentos y la respuesta de RAG
+        documents, rag_response = queryObj.execute(query)
+        
+        if not documents:
+            print("No se encontraron resultados.")
+        else:
+            print(f"Se encontraron {len(documents)} resultados:")
+            for idx, doc in enumerate(documents, 1):
+                print(f"{idx}. [{doc.league}] {doc.title}")
+                print(f"   URL: {doc.url}\n")
+            
+            print("\n--- Respuesta del Modelo RAG ---")
+            print(rag_response)
+            print("--------------------------------\n")
 
 main()
  

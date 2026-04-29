@@ -32,13 +32,13 @@ class AsSpider(scrapy.Spider):
             if texto_parrafo:
                 texto_limpio.append(texto_parrafo)
         
-        cuerpo_completo = " ".join(texto_limpio)
-        noticia_final = f"{entradilla} {cuerpo_completo}" if entradilla else cuerpo_completo
+        if entradilla:
+            texto_limpio.insert(0, entradilla.strip())
 
-        if len(cuerpo_completo) > 100:
+        if texto_limpio:
             yield {
                 'liga': liga,
                 'titular': titulo.strip() if titulo else None,
                 'url': response.url,
-                'texto_noticia': noticia_final.strip()
+                'texto_noticia': texto_limpio
             }

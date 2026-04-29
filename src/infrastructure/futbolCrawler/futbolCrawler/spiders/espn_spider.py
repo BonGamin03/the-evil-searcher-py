@@ -62,16 +62,11 @@ class EspnSpider(scrapy.Spider):
             if texto_parrafo:
                 texto_limpio.append(texto_parrafo)
 
-        cuerpo_completo = " ".join(texto_limpio)
-        noticia_final = f"{entradilla} {cuerpo_completo}" if entradilla else cuerpo_completo
-
-        equipo = response.css('div.article-meta .byline-wrap .author::text').get()
-        if not equipo:
-            equipo = response.css('span.section-tag::text').get()
-
+        if entradilla:
+            texto_limpio.insert(0, entradilla.strip())
         yield {
             'liga': liga,
             'titular': titulo.strip() if titulo else None,
             'url': response.url,
-            'texto_noticia': noticia_final.strip()
+            'texto_noticia': texto_limpio
         }

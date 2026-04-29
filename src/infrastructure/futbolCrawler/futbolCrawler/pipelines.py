@@ -12,7 +12,7 @@ class FutbolcrawlerPipeline:
     def process_item(self, item, spider):
 
         if item.get("texto_noticia"):
-            item["texto_noticia"] = self.clean_text(item["texto_noticia"]) 
+            item["texto_noticia"] = [self.clean_text(p) for p in item["texto_noticia"] if self.clean_text(p)]
         if item.get('titular'):
             item['titular'] = self.clean_text(item['titular'])
 
