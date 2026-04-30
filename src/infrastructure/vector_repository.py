@@ -8,18 +8,31 @@ class ChromaVectorRepository(IVectorRepository):
             metadata={"hnsw:space": "cosine"},
         )
 
-    def upsert(self, doc_id: int, embedding: list[float], metadata=None) -> None:
+    def upsert(self, doc_id: int, chunk_id: int , embedding: list[float], metadata={}) -> None:
+        
+        metadata["doc_id"] = doc_id
+        metadata["chunk_id"] = chunk_id 
+        
         self._collection.upsert(
-            ids=[str(doc_id)],
+            ids=[f"{doc_id}_{chunk_id}"],
             embeddings=[embedding],
+            metadatas=[metadata],
         )
 
-    def query(self, query_embedding: list[float], k=10, where=None) -> list[int]:
+    def query(self, query_embedding: list[float], k=50, where=None) -> list[tuple[int, int]]:
         res = self._collection.query(
             query_embeddings=[query_embedding],
             n_results=k,
+            where=where,
+            include=["metadatas"],
         )
-        return res["ids"][0] # Esto es porque res["ids"] es una lista de listas, y queremos la primera lista que corresponde a nuestra consulta
+        results = []
+
+        for meta in res["metadatas"][0]:
+            results.append((int(meta["doc_id"]), int(meta["chunk_id"])))
+
+        return results
     
+    #No me consta de que esto esté bien implementado ni que sea necesario 
     def delete(self, doc_id):
         return super().delete(doc_id)
