@@ -2,17 +2,24 @@ from domain.i_document_repository import IDocumentRepository
 from domain.i_vector_repository import IVectorRepository
 from domain.i_embedding_generator import IEmbeddingGenerator
 from domain.document import Document
+from domain.inverted_index import InvertedIndex
+from domain.i_document_processor import IDocumentProcessor
+from domain.probabilistic_model import ProbabilisticModel
 from domain.i_rag import IRAG
 
 class ShowResultsUseCase:
     def __init__(
         self,
         document_repository: IDocumentRepository,
+        inverted_index : InvertedIndex,
+        document_procesor : IDocumentProcessor,
         vector_repository: IVectorRepository,
         embedding_generator: IEmbeddingGenerator,
         rag_model : IRAG
     ):
         self._document_repository = document_repository
+        self.inverted_index = inverted_index
+        self. document_procesor = document_procesor
         self._vector_repository = vector_repository
         self._embedding_generator = embedding_generator
         self._rag_model = rag_model
@@ -44,6 +51,10 @@ class ShowResultsUseCase:
             
             document = fetched_docs.get(doc_id)
             context_chunks.append(document.content[chunk_id])
+
+        model = ProbabilisticModel(self.inverted_index,self.document_procesor)
+
+        documents = [x for x in model.calculate_similarity(query, documents)]
 
         # Preparar contexto y consultar al RAG
         context_str = "\n...\n".join(context_chunks)
