@@ -5,7 +5,7 @@ class MetaLLamaRAG(IRAG):
     def __init__(self):
          self.client = InferenceClient(
             model="meta-llama/Llama-3.1-8B-Instruct",
-            token="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" 
+            token="HF_TOKEN" 
         )
 
     def generate_response(self, query: str, context: str) -> str:

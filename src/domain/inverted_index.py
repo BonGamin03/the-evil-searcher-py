@@ -1,5 +1,5 @@
 from collections import defaultdict,Counter
-from skiplist import SkipList
+from domain.skiplist import SkipList
 class InvertedIndex:
     def __init__(self):
         #Duda sobre campos private

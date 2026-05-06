@@ -1,15 +1,17 @@
 '''from application.run_scraper_use_case import RunFullScraperUseCase
 test=RunFullScraperUseCase()
 test.execute()'''
-import asyncio
 from pymongo import MongoClient
 
 from infrastructure.document_repository import DocumentRepository
 from infrastructure.vector_repository import ChromaVectorRepository
-from infrastructure.lsa_embedding_generator import LSAEmbeddingGenerator
+from infrastructure.hg_embedding_gen import HGEmbeddingGen
 from application.show_results_use_case import ShowResultsUseCase
 from application.load_embedings_use_case import LoadEmbeddingsUseCase
 from infrastructure.meta_llama_rag import MetaLLamaRAG
+from domain.inverted_index import InvertedIndex
+from infrastructure.document_processor import DocumentProcessor
+from application.build_inverted_index import BuildInvertedIndexUseCase
 
 def main():
     print("Conectando a MongoDB...")
@@ -20,15 +22,21 @@ def main():
     print("Inicializando repositorios...")
     document_repo = DocumentRepository(db)
     vector_repo = ChromaVectorRepository()
+    document_procesor = DocumentProcessor()
+    builder = BuildInvertedIndexUseCase(document_repo,document_procesor)
+    inverted_index = builder.execute()
+
+
     
     print("Cargando documentos e inicializando modelo de embeddings...")
     # Se obtienen todos los documentos en caso de que LSA necesite entrenar
     documents=document_repo.get_all_documents()
-    embedding=LSAEmbeddingGenerator(documents)
+    embedding=HGEmbeddingGen()
     generator=LoadEmbeddingsUseCase(document_repo,embedding,vector_repo)
     rag_model = MetaLLamaRAG()
     generator.execute()
-    queryObj=ShowResultsUseCase(document_repo,vector_repo,embedding,rag_model)
+    queryObj=ShowResultsUseCase(document_repo,inverted_index,document_procesor,
+    vector_repo,embedding,rag_model)
     print("Inicializando caso de uso de búsqueda...")
     while True:
         print("\n" + "="*50)
@@ -50,9 +58,10 @@ def main():
             print("No se encontraron resultados.")
         else:
             print(f"Se encontraron {len(documents)} resultados:")
-            for idx, doc in enumerate(documents, 1):
-                print(f"{idx}. [{doc.league}] {doc.title}")
+            for doc,score in documents:
+                print(f"{doc.id}. [{doc.league}] {doc.title}")
                 print(f"   URL: {doc.url}\n")
+                print(f"Score : {score}")
             
             print("\n--- Respuesta del Modelo RAG ---")
             print(rag_response)
