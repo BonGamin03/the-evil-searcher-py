@@ -52,7 +52,7 @@ def main():
         print(f"\nEjecutando búsqueda para la query: '{query}'\n")
         
         # Desempaquetamos los documentos y la respuesta de RAG
-        documents, rag_response = queryObj.execute(query)
+        documents, context = queryObj.execute(query)
         
         if not documents:
             print("No se encontraron resultados.")

@@ -3,6 +3,7 @@ searcherenv/
 **/chroma_data/
 **/lsaModel/
 **/*.joblib
+**/*.json 
 **/__pycache__/
 .env
 **/node_modules/ 

@@ -59,6 +59,6 @@ class ShowResultsUseCase:
         # Preparar contexto y consultar al RAG
         context_str = "\n...\n".join(context_chunks)
 
-        rag_response = self._rag_model.generate_response(query=query, context=context_str)
+        # rag_response = self._rag_model.generate_response(query=query, context=context_str)
 
-        return documents, rag_response
+        return documents, context_str
