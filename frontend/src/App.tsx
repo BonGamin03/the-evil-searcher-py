@@ -51,8 +51,8 @@ return (
             ) : (
               hasSearched && !error && (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  {results.aiResponse && <AIInformation content={results.aiResponse} />}
-                  <Results data={results.items} />
+                  {results.rag && <AIInformation content={results.rag} />}
+                  <Results data={results.results} />
                 </div>
               )
             )}

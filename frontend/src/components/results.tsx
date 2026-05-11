@@ -4,9 +4,9 @@ interface SearchResult {
   id: string;
   title: string;
   url: string;
-  displayUrl: string;
-  description: string;
-  date?: string;
+  displayUrl?: string;
+  content: string;
+  league?: string;
 }
 interface ResultsProps {
   data: SearchResult[];
@@ -22,28 +22,28 @@ interface ResultsProps {
 
       {/* Lista de resultados */}
       <div className="flex flex-col gap-10">
-        {data.map((result) => (
-          <div key={result.id} className="group flex flex-col gap-1">
+        {data.map((items) => (
+          <div key={items.id} className="group flex flex-col gap-1">
             {/* Meta info / URL */}
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="truncate">{result.displayUrl}</span>
+              <span className="truncate">{items.displayUrl}</span>
               <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
 
             {/* Título */}
             <a 
-              href={result.url} 
+              href={items.url} 
               className="text-xl font-medium text-blue-600 dark:text-blue-400 hover:underline decoration-blue-600 underline-offset-2"
             >
-              <h3>{result.title}</h3>
+              <h3>{items.title}</h3>
             </a>
 
             {/* Descripción */}
             <div className="text-sm text-foreground/80 leading-relaxed max-w-prose">
-              {result.date && (
-                <span className="text-muted-foreground mr-2">{result.date} —</span>
+              {items.league && (
+                <span className="text-muted-foreground mr-2">{items.league} —</span>
               )}
-              {result.description}
+              {items.content.slice(0,1)}...
             </div>
           </div>
         ))}

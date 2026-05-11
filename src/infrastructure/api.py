@@ -33,6 +33,7 @@ def get_scraper_use_case():
 @app.get("/search")
 def search(query: str = Query(...,min_length=1),use_case: ShowResultsUseCase = Depends(get_search_use_case)):
     docs,rag = use_case.execute(query)
+    
     return {"query": query, "results": docs, "rag": rag}
 
 @app.get("/scraper")
