@@ -39,4 +39,5 @@ class ProbabilisticModel:
             rankings.append((doc, score))
         
         # Ordenar por ranking decreciente[cite: 1]
-        return sorted(rankings, key=lambda x: x[1], reverse=True)
+        sorted(rankings, key=lambda x: x[1], reverse=True)
+        return [doc for doc, score in rankings]
