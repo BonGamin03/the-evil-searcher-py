@@ -17,6 +17,7 @@ class ZenserpSearcher(IWebSearcher):
         params = (
             ("q", query),
             ("tbm", "nws"),
+            ("hl", "es"),
         )
         
         response = requests.get(self.url, headers=headers, params=params)

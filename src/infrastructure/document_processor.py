@@ -31,4 +31,29 @@ class DocumentProcessor(IDocumentProcessor):
                         terms.append(term)
 
                 return terms
+        def process_query(self, query: str) -> list[str]:
+                """
+                Process a query and return normalized tokens
+        
+                Args:
+                query: str. Query to process
+                
+                Returns:
+                list. List of words 
+                """
+                text = self.nlp(query)
+                terms = []
+
+                for token in text:
+                        if token.is_punct or token.is_space:
+                                continue
+                
+                        if token.is_stop:
+                                continue
+                
+                        term = token.lemma_
+                        term = term.lower()
+                        terms.append(term)
+
+                return terms
                 

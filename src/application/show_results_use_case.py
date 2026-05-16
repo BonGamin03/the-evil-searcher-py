@@ -4,8 +4,7 @@ from domain.i_embedding_generator import IEmbeddingGenerator
 from domain.document import Document
 from domain.inverted_index import InvertedIndex
 from domain.i_document_processor import IDocumentProcessor
-from domain.probabilistic_model import ProbabilisticModel
-from domain.i_rag import IRAG
+from domain.i_re_rank_llm_context import IReRankLLMContext
 
 class ShowResultsUseCase:
     def __init__(
@@ -15,14 +14,14 @@ class ShowResultsUseCase:
         document_procesor : IDocumentProcessor,
         vector_repository: IVectorRepository,
         embedding_generator: IEmbeddingGenerator,
-        rag_model : IRAG
+        re_rank_chunk  : IReRankLLMContext
     ):
         self._document_repository = document_repository
         self.inverted_index = inverted_index
         self. document_procesor = document_procesor
         self._vector_repository = vector_repository
         self._embedding_generator = embedding_generator
-        self._rag_model = rag_model
+        self.re_rank_chunk = re_rank_chunk
 
     def execute(self, query: str) -> tuple[list[Document], str]:
         query_embedding = self._embedding_generator.text_to_embedding(query)
@@ -50,15 +49,19 @@ class ShowResultsUseCase:
                 documents.append(doc) 
             
             document = fetched_docs.get(doc_id)
-            context_chunks.append(document.content[chunk_id])
+            
+            print(f"Documento ID: {doc_id}, Chunk ID: {chunk_id}")  # Para depuración y seguimiento de resultados
+            if chunk_id == 0:
+                context_chunks.append(document.content[0])
+            else:
+                context_chunks.append(document.content[chunk_id - 1])
+                context_chunks.append(document.content[chunk_id])
+                if chunk_id + 1 < len(document.content):
+                    context_chunks.append(document.content[chunk_id + 1])
 
-        model = ProbabilisticModel(self.inverted_index,self.document_procesor)
-
-        documents = [x for x in model.calculate_similarity(query, documents)]
-
+        context_chunks = self.re_rank_chunk.re_rank_results(query, context_chunks)
         # Preparar contexto y consultar al RAG
-        context_str = "\n...\n".join(context_chunks)
+        context_str = "\n...\n".join(chunk for score, chunk in context_chunks[:10]) 
 
-        # rag_response = self._rag_model.generate_response(query=query, context=context_str)
 
         return documents, context_str

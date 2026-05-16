@@ -5,3 +5,6 @@ class IDocumentProcessor(ABC):
     @abstractmethod
     def process_document(self,doc:Document)->list[str]:
         pass
+    @abstractmethod
+    def process_query(self,query:str)->list[str]:
+        pass
