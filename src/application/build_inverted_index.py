@@ -1,6 +1,7 @@
 from domain.i_document_repository import IDocumentRepository
 from domain.i_document_processor import IDocumentProcessor
 from domain.inverted_index import InvertedIndex
+from application.save_inverted_index import SaveInvertedIndexUseCase
 import joblib
 import os
 import sys
@@ -26,10 +27,10 @@ class BuildInvertedIndexUseCase:
         for doc in docs:
             terms = self.doc_processor.process_document(doc)
             inverted_index.add_document(doc.id, terms)
-        
-        sys.setrecursionlimit(10000) 
-        joblib.dump(inverted_index._index, self.index_path)
-        
+
+        save_inverte_index = SaveInvertedIndexUseCase()
+        save_inverte_index.execute(inverted_index)
+
         return inverted_index
 
 # class BuildInvertedIndexUseCase:
