@@ -40,9 +40,9 @@ def main():
     generator = LoadEmbeddingsUseCase(document_repo, embedding, vector_repo)
     
     # Tokens e instanciación de servicios externos
-    hf_token = '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'
+    hf_token = 'HG_TOKEN'
     rag_model = MetaLLamaRAG(hf_token)
-    searcher = ZenserpSearcher('15b69a40-4b14-11f1-8fd9-734ce4fa9350')
+    searcher = ZenserpSearcher('API-KEY')
      
     # Casos de uso atómicos
     show_results = ShowResultsUseCase(document_repo, inverted_index, document_processor, vector_repo, embedding,re_rank_text)
