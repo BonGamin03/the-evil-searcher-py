@@ -74,7 +74,8 @@ DEFAULT_REQUEST_HEADERS = {
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    "futbolCrawler.pipelines.FutbolcrawlerPipeline": 300,
-      "futbolCrawler.pipelines.MongoStorePipeline": 400,
+    "futbolCrawler.pipelines.MongoStorePipeline": 400,
+    "futbolCrawler.pipelines.EmbedggingPipeline": 500,
 }
 
 
@@ -84,6 +85,9 @@ MONGO_URI = os.getenv(
     "mongodb://admin:admin@localhost:27017/evil_searcher?authSource=admin",
 )
 MONGO_DATABASE = os.getenv("MONGO_DATABASE", "evil_searcher")
+
+CHROMADB_URI = os.getenv("CHROMADB_URI", "./chroma_data")
+CHROMA_DB_COLLECTION = os.getenv("CHROMA_DB_COLLECTION", "documents")
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

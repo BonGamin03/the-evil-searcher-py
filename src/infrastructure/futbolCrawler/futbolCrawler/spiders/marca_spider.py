@@ -21,7 +21,7 @@ class MarcaSpider(scrapy.Spider):
 
         for url in enlaces_noticias:
              if 'marca.com' in url:
-                 yield response.follow(url, callback=self.parse_news, cb_kwargs={'liga': liga})
+                 yield response.follow(url, callback=self.parse_news , cb_kwargs={'liga': liga})
 
     def parse_news(self, response,liga):
      

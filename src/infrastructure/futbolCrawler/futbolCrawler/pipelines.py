@@ -8,6 +8,8 @@
 from itemadapter import ItemAdapter
 import re
 
+from infrastructure.hg_embedding_gen import HGEmbeddingGen
+
 class FutbolcrawlerPipeline:
     def process_item(self, item, spider):
 
@@ -31,6 +33,7 @@ class FutbolcrawlerPipeline:
 import os
 from pymongo import MongoClient
 from infrastructure.document_repository import DocumentRepository
+from infrastructure.vector_repository import ChromaVectorRepository
 
 class MongoStorePipeline:
     @classmethod
@@ -70,5 +73,32 @@ class MongoStorePipeline:
                 content=content,
             )
             item["doc_id"] = doc_id
+
+        return item
+class EmbedggingPipeline:
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(
+            chroma_uri = crawler.settings.get("CHROMADB_URI", "./chroma_data"),
+            chroma_collection = crawler.settings.get("CHROMA_DB_COLLECTION", "documents")
+        )
+
+    def __init__(self, chroma_uri: str, chroma_collection: str):
+        self.chroma_uri = chroma_uri
+        self.chroma_collection = chroma_collection
+
+    def open_spider(self, spider):
+        self.vector_repo = ChromaVectorRepository(persist_path=self.chroma_uri, collection_name=self.chroma_collection)
+        self.embedding_generator = HGEmbeddingGen()
+
+    def process_item(self, item, spider):
+        content = item.get("texto_noticia")
+
+        i=0
+        for chunk in content:
+            embedding = self.embedding_generator.text_to_embedding(chunk)
+            self.vector_repo.upsert(item["doc_id"], i, embedding)
+            i+=1
 
         return item
