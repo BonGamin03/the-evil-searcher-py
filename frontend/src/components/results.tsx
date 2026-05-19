@@ -1,15 +1,32 @@
 import { ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface SearchResult {
   id: string;
   title: string;
   url: string;
   displayUrl?: string;
-  content: string;
+  content: string | string[];
   league?: string;
+  relevance_score?: number;
+  authority_score?: number;
+  freshness_score?: number;
+  final_score?: number;
+  ranking_type?: string;
+  content_type?: string;
+  featured_snippet?: string;
+  snippet_confidence?: number;
 }
+
 interface ResultsProps {
   data: SearchResult[];
+}
+
+function getContentPreview(content: string | string[]): string {
+  if (Array.isArray(content)) {
+    return content[0] || "Sin descripción disponible";
+  }
+  return content;
 }
 
  export function Results({data}: ResultsProps) {
@@ -23,28 +40,59 @@ interface ResultsProps {
       {/* Lista de resultados */}
       <div className="flex flex-col gap-10">
         {data.map((items) => (
-          <div key={items.id} className="group flex flex-col gap-1">
+          <div key={items.id} className="group flex flex-col gap-2">
             {/* Meta info / URL */}
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="truncate">{items.displayUrl}</span>
+              <span className="truncate">{items.displayUrl || items.url}</span>
               <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
 
-            {/* Título */}
-            <a 
-              href={items.url} 
-              className="text-xl font-medium text-blue-600 dark:text-blue-400 hover:underline decoration-blue-600 underline-offset-2"
+            {/* Título - Link interno */}
+            <Link
+              to={`/article/${items.id}`}
+              className="text-xl font-medium text-blue-600 dark:text-blue-400 hover:underline decoration-blue-600 underline-offset-2 cursor-pointer"
             >
               <h3>{items.title}</h3>
-            </a>
+            </Link>
+
+            {/* Badges de ranking */}
+            <div className="flex flex-wrap gap-2">
+              {items.content_type && (
+                <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full font-medium">
+                  {items.content_type.toUpperCase()}
+                </span>
+              )}
+              
+              {items.freshness_score !== undefined && items.freshness_score >= 80 && (
+                <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-950 text-green-800 dark:text-green-100 rounded-full font-medium">
+                  📰 Reciente
+                </span>
+              )}
+              
+              {items.authority_score !== undefined && items.authority_score >= 85 && (
+                <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-100 rounded-full font-medium">
+                  ✓ Confiable
+                </span>
+              )}
+            </div>
 
             {/* Descripción */}
             <div className="text-sm text-foreground/80 leading-relaxed max-w-prose">
               {items.league && (
                 <span className="text-muted-foreground mr-2">{items.league} —</span>
               )}
-              {items.content.slice(0,1)}...
+              {items.featured_snippet || getContentPreview(items.content)}...
             </div>
+
+            {/* Score info pequeño */}
+            {items.final_score !== undefined && (
+              <div className="text-xs text-muted-foreground pt-1">
+                <span>Score: {items.final_score.toFixed(1)}</span>
+                {items.authority_score !== undefined && (
+                  <span> • Autoridad: {items.authority_score.toFixed(0)}%</span>
+                )}
+              </div>
+            )}
           </div>
         ))}
       </div>
