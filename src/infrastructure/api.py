@@ -23,8 +23,9 @@ vec_repo = ChromaVectorRepository()
 embedding_gen=HGEmbeddingGen()
 rag_gen=MetaLLamaRAG()
 builder_index=BuildInvertedIndexUseCase(doc_repo,doc_proccesor)
+embeddings=LoadEmbeddingsUseCase(doc_repo,embedding_gen,vec_repo)
 inverted_index=builder_index.execute()
-
+embeddings.execute()
 def get_search_use_case():
      return ShowResultsUseCase(doc_repo,inverted_index,doc_proccesor,vec_repo,embedding_gen,rag_gen)
 def get_scraper_use_case():
