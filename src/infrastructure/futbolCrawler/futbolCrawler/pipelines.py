@@ -64,6 +64,7 @@ class MongoStorePipeline:
         titulo = item.get("titular")
         url = item.get("url")
         content = item.get("texto_noticia")
+        fecha_publicacion = item.get("fecha_publicacion")
 
         if liga and titulo and url and content:
             doc_id = self.repo.save_document(
@@ -71,6 +72,7 @@ class MongoStorePipeline:
                 league=liga,
                 url=url,
                 content=content,
+                publication_date=fecha_publicacion,
             )
             item["doc_id"] = doc_id
 

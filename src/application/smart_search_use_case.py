@@ -45,16 +45,16 @@ class SmartSearchUseCase:
         score = [sc for sc, doc in  self.re_rank.re_rank_results(query, [x.get_full_text() for x , y in documents])]
 
         print(f"Score de documentos : {score}")  # Para depuración y seguimiento de resultados
-        # if abs(score[0]) < 6.0:  # Si el documento más relevante tiene una puntuación baja, consideramos el contexto no relevante
-        #     print("El contexto recuperado no es relevante. Realizando búsqueda web...")
-        #     documents, context = self.get_content_use_case.execute(query)
+        if abs(score[0]) < 6.0:  # Si el documento más relevante tiene una puntuación baja, consideramos el contexto no relevante
+            print("El contexto recuperado no es relevante. Realizando búsqueda web...")
+            documents, context = self.get_content_use_case.execute(query)
             
     
-        #     vec_db_thread = Thread(target=self.load_embeddings_use_case.execute, args=(documents,))
-        #     vec_db_thread.start()
+            vec_db_thread = Thread(target=self.load_embeddings_use_case.execute, args=(documents,))
+            vec_db_thread.start()
             
-        #     inverted_index_thread = Thread(target=self.async_updates_inverted_index, args=(documents,))
-        #     inverted_index_thread.start()
+            inverted_index_thread = Thread(target=self.async_updates_inverted_index, args=(documents,))
+            inverted_index_thread.start()
 
         document_results = []
         for item in documents:

@@ -39,7 +39,7 @@ def main():
     documents = document_repo.get_all_documents()
     embedding = HGEmbeddingGen()
     generator = LoadEmbeddingsUseCase(document_repo, embedding, vector_repo)
-    
+    #generator.execute(documents)
     # Tokens e instanciación de servicios externos
     hf_token = 'HG_TOKEN'
     rag_model = MetaLLamaRAG(hf_token)
@@ -85,7 +85,7 @@ def main():
             print(f"   URL: {doc.document.url}\n")
             print(f"   Scores: {doc.authority_score}, {doc.freshness_score} , {doc.final_score} , {doc.relevance_score} \n")
             print(f"   Snipet: {doc.featured_snippet} , {doc.snippet_confidence} \n")
-            
+
 
 
             

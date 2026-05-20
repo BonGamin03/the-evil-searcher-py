@@ -1,7 +1,7 @@
 from typing import Any
 import scrapy
 from scrapy.http import Response
-from futbolCrawler.date_extractor import DateFinderInHTML, DateExtractor
+from ..date_extractor import DateFinderInHTML, DateExtractor
 
 class TudnSpider(scrapy.Spider):
     name = 'tudn_spider'
