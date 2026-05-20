@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { useSearchContext } from "@/context/SearchContext";
 
 interface SearchResult {
   id: string;
@@ -54,9 +55,8 @@ export interface SearchResponse {
 // Always verify the source links provided below for maximum accuracy. 
 // The gradient effect you see at the bottom of this box should disappear once you click the 'Show more' button, expanding the container to its full height and revealing the rest of the documentation about the indexing process and safety protocols implemented in the version 1.0.4.`;
 export function useSearch() {
-  const [results, setResults] = useState<SearchResponse | undefined>();
+  const { setResults: setContextResults, setLastQuery, hasSearched: contextHasSearched, setHasSearched: setContextHasSearched, results: contextResults } = useSearchContext();
   const [isLoading, setIsLoading] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const performSearch = async (query: string) => {
@@ -64,28 +64,28 @@ export function useSearch() {
 
     setIsLoading(true);
     setError(null);
-    setHasSearched(true);
+    setContextHasSearched(true);
+    setLastQuery(query);
 
     try {
       
       const response = await axios.get(`http://localhost:8000/search?query=${encodeURIComponent(query)}`);
-      //const response:SearchResponse={aiResponse: textRag, items: data};
       console.log("API Response:", response.data);
-      setResults(response.data);
+      setContextResults(response.data); // Guardar globalmente para que persista
     } catch (err) {
       console.error("Search error:", err);
       setError("Failed to fetch results. Please try again.");
-      setResults(undefined);  
+      setContextResults(undefined);  
     } finally {
       setIsLoading(false);
     }
   };
 
   const resetSearch = () => {
-    setHasSearched(false);
-    setResults(undefined);
+    setContextHasSearched(false);
+    setContextResults(undefined);
     setError(null);
   };
 
-  return { results, isLoading, hasSearched, error, performSearch, resetSearch };
+  return { results: contextResults, isLoading, hasSearched: contextHasSearched, error, performSearch, resetSearch };
 }

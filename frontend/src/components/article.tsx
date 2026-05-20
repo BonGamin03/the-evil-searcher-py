@@ -89,11 +89,11 @@ export function Article() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate("/")}
+            onClick={() => navigate(-1)}
             className="rounded-full"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Volver
+            Volver a resultados
           </Button>
           
           <div className="flex items-center gap-2">

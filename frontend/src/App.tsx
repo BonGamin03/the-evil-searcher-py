@@ -9,9 +9,11 @@ import { useSearch } from "./lib/use-search"
 import { Loading } from "./components/loading"
 import { AIInformation } from "./components/ai-information"
 import { Routes, Route } from "react-router-dom"
+import { SearchProvider, useSearchContext } from "./context/SearchContext"
 
 function HomePage() {
    const { results, isLoading, hasSearched, error, performSearch } = useSearch();
+   const { results: contextResults } = useSearchContext(); // Recuperar resultados guardados
 
   
    
@@ -52,8 +54,8 @@ return (
           ) : (
             hasSearched && !error && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                {results.rag && <AIInformation content={results.rag} />}
-                <Results data={results.results} />
+                {contextResults?.rag && <AIInformation content={contextResults.rag} />}
+                {contextResults?.results && <Results data={contextResults.results} />}
               </div>
             )
           )}
@@ -67,12 +69,14 @@ return (
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/article/:id" element={<Article />} />
-      </Routes>
-    </ThemeProvider>
+    <SearchProvider>
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/article/:id" element={<Article />} />
+        </Routes>
+      </ThemeProvider>
+    </SearchProvider>
   )
 }
 

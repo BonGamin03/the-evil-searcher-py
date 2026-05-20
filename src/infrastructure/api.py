@@ -12,6 +12,11 @@ from application.build_inverted_index import BuildInvertedIndexUseCase
 from application.load_embedings_use_case import LoadEmbeddingsUseCase
 from infrastructure.document_processor import DocumentProcessor
 from infrastructure.hg_embedding_gen import HGEmbeddingGen
+from application.smart_search_use_case import SmartSearchUseCase
+from application.get_content_search_use_case import GetContentSearchUseCase
+from infrastructure.zenserp_searcher import ZenserpSearcher
+from infrastructure.re_rank_chunks import ReRankCTexts
+from application.ranking_orchestration_use_case import RankingOrchestrationUseCase
 
 app = FastAPI(title="The Evil Searcher API ")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -25,17 +30,20 @@ rag_gen=MetaLLamaRAG("aaa")
 builder_index=BuildInvertedIndexUseCase(doc_repo,doc_proccesor)
 embeddings=LoadEmbeddingsUseCase(doc_repo,embedding_gen,vec_repo)
 inverted_index=builder_index.execute()
+web_searcher=ZenserpSearcher('API-KEY')
+get_content=GetContentSearchUseCase(web_searcher,doc_repo)
+re_rank=ReRankCTexts()
+final_ranking=RankingOrchestrationUseCase(doc_proccesor,re_rank)
 #embeddings.execute()
+
 def get_search_use_case():
-     return ShowResultsUseCase(doc_repo,inverted_index,doc_proccesor,vec_repo,embedding_gen,rag_gen)
+     show_result= ShowResultsUseCase(doc_repo,inverted_index,doc_proccesor,vec_repo,embedding_gen,re_rank)
+     return SmartSearchUseCase(show_result,get_content,embeddings,rag_gen,inverted_index,doc_proccesor,re_rank,final_ranking)
 def get_scraper_use_case():
      return RunFullScraperUseCase()
 
 @app.get("/search")
-def search(
-    query: str = Query(..., min_length=1),
-    location: str = Query(None),
-    use_case: ShowResultsUseCase = Depends(get_search_use_case)
+def search(query: str = Query(..., min_length=1),location: str = Query(None),use_case: SmartSearchUseCase = Depends(get_search_use_case)
 ):
     ranked_results, rag = use_case.execute(query, user_location=location)
     
@@ -69,8 +77,8 @@ def search(
 @app.get("/article/{doc_id}")
 def get_article(doc_id: int = Path(..., description="ID del documento")):
     """Retorna el contenido completo de un artículo"""
-    use_case = get_search_use_case()
-    doc = use_case._document_repository.get_document(doc_id)
+    
+    doc = doc_repo.get_document(doc_id)
     
     if not doc:
         return {"error": "Documento no encontrado"}
