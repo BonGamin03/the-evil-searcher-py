@@ -21,7 +21,7 @@ class DocumentRepository(IDocumentRepository):
         doc = self.db.documents.find_one({"url": url}, {"doc_id": 1})
         return int(doc["doc_id"]) if doc and "doc_id" in doc else None
 
-    def save_document(self, title: str, league: str, url: str, content: list) -> int:
+    def save_document(self, title: str, league: str, url: str, content: list, publication_date: str = None) -> int:
         existing = self._get_doc_id_by_url(url)
         if existing:
             return existing
@@ -35,6 +35,7 @@ class DocumentRepository(IDocumentRepository):
                     "league": league,
                     "url": url,
                     "content": content,
+                    "publication_date": publication_date,
                 }
             )
             return doc_id
@@ -54,6 +55,7 @@ class DocumentRepository(IDocumentRepository):
                     doc["league"],
                     doc["url"],
                     doc["content"],
+                    doc.get("publication_date"),
                 )
             )
         return documents
@@ -68,6 +70,7 @@ class DocumentRepository(IDocumentRepository):
             doc["league"],
             doc["url"],
             doc["content"],
+            doc.get("publication_date"),
         )
 
  

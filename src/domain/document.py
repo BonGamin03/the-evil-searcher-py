@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from typing import Optional
+
 @dataclass
 class Document:
     """
@@ -10,6 +12,7 @@ class Document:
         league:str. Represents the soccer league
         url: str. News url
         content: str. Full News content
+        publication_date: Optional[str]. Publication date in YYYY-MM-DD format
         
     """
     id:int
@@ -17,6 +20,7 @@ class Document:
     league:str
     url:str
     content: list
+    publication_date: Optional[str] = None
 
     def get_full_text(self) -> str:
         """

@@ -1,7 +1,7 @@
 
 from typing import Tuple
-from document import Document
-from i_re_rank_llm_context import IReRankLLMContext
+from domain.document import Document
+from domain.i_re_rank_llm_context import IReRankLLMContext
 
 
 class FeaturedSnippetExtractor:

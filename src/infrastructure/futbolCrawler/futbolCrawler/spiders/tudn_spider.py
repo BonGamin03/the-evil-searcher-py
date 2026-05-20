@@ -1,6 +1,7 @@
 from typing import Any
 import scrapy
 from scrapy.http import Response
+from futbolCrawler.date_extractor import DateFinderInHTML, DateExtractor
 
 class TudnSpider(scrapy.Spider):
     name = 'tudn_spider'
@@ -51,11 +52,53 @@ class TudnSpider(scrapy.Spider):
         if entradilla:
             texto_limpio.insert(0, entradilla.strip())
 
+        # Extraer fecha
+        fecha = self._extract_publication_date(response)
+
         # Condicion para filtar noticias poco documentadas y anuncios 
         if len(texto_limpio) > 2:
             yield {
                 'liga': liga,
                 'titular': titulo.strip() if titulo else None,
                 'url': response.url,
-                'texto_noticia': texto_limpio
+                'texto_noticia': texto_limpio,
+                'fecha_publicacion': fecha
             }
+    
+    def _extract_publication_date(self, response: Response) -> str:
+        """
+        Extrae la fecha de publicación de TUDN
+        """
+        # 1. Intentar con JSON-LD primero (más confiable)
+        fecha = DateFinderInHTML.find_in_json_ld(response)
+        if fecha:
+            return DateExtractor.format_date(fecha)
+        
+        # 2. Intentar con meta tags
+        fecha = DateFinderInHTML.find_in_meta_tags(response)
+        if fecha:
+            return DateExtractor.format_date(fecha)
+        
+        # 3. Selectores específicos de TUDN
+        selectors_tudn = [
+            'time::attr(datetime)',
+            'span.articleDate::text',
+            'span[class*="published"]::text',
+            'span[class*="date"]::text',
+            'span[class*="time"]::text',
+            'div.article-date::text',
+            'p.article-date::text',
+        ]
+        
+        fecha = DateFinderInHTML.find_in_common_selectors(response, selectors_tudn)
+        if fecha:
+            return DateExtractor.format_date(fecha)
+        
+        # 4. Buscar en metadata del artículo
+        article_info = " ".join(response.css('div[class*="article__info"] ::text, div[class*="article__meta"] ::text').getall())
+        if article_info:
+            fecha = DateExtractor.extract_date(article_info)
+            if fecha:
+                return DateExtractor.format_date(fecha)
+        
+        return None

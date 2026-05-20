@@ -17,6 +17,7 @@ from application.smart_search_use_case import SmartSearchUseCase
 from infrastructure.zenserp_searcher import ZenserpSearcher
 from infrastructure.re_rank_chunks import ReRankCTexts
 from application.run_scraper_use_case import RunFullScraperUseCase
+from application.ranking_orchestration_use_case import RankingOrchestrationUseCase
 
 def main():
     print("Conectando a MongoDB...")
@@ -47,7 +48,7 @@ def main():
     # Casos de uso atómicos
     show_results = ShowResultsUseCase(document_repo, inverted_index, document_processor, vector_repo, embedding,re_rank_text)
     get_content = GetContentSearchUseCase(searcher, document_repo)
-    
+    ranking=RankingOrchestrationUseCase(document_processor,re_rank_text)
     # Orquestador
     smart_search = SmartSearchUseCase(
         show_results_use_case=show_results,
@@ -56,7 +57,9 @@ def main():
         rag_model=rag_model,
         inverted_index=inverted_index,
         document_processor=document_processor,
-        re_rank= re_rank_text
+        re_rank= re_rank_text,
+        doc_ranking=ranking
+
     )
     
     print("Inicializando caso de uso de búsqueda...")
@@ -78,8 +81,13 @@ def main():
 
         print(f"Se encontraron {len(documents_list)} resultados:")
         for doc in documents_list: 
-            print(f"{doc.id}. [{doc.league}] {doc.title}")
-            print(f"   URL: {doc.url}\n")
+            print(f"{doc.document.id}. [{doc.document.league}] {doc.document.title}")
+            print(f"   URL: {doc.document.url}\n")
+            print(f"   Scores: {doc.authority_score}, {doc.freshness_score} , {doc.final_score} , {doc.relevance_score} \n")
+            print(f"   Snipet: {doc.featured_snippet} , {doc.snippet_confidence} \n")
+            
+
+
             
         print("\n--- Respuesta del Modelo RAG ---")
         print(rag_response)

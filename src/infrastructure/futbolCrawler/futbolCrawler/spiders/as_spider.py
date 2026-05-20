@@ -1,4 +1,6 @@
 import scrapy
+from scrapy.http import Response
+from futbolCrawler.date_extractor import DateFinderInHTML, DateExtractor
 
 class AsSpider(scrapy.Spider):
     name = 'as_spider'
@@ -35,10 +37,51 @@ class AsSpider(scrapy.Spider):
         if entradilla:
             texto_limpio.insert(0, entradilla.strip())
 
+        # Extraer fecha
+        fecha = self._extract_publication_date(response)
+
         if texto_limpio:
             yield {
                 'liga': liga,
                 'titular': titulo.strip() if titulo else None,
                 'url': response.url,
-                'texto_noticia': texto_limpio
+                'texto_noticia': texto_limpio,
+                'fecha_publicacion': fecha
             }
+    
+    def _extract_publication_date(self, response: Response) -> str:
+        """
+        Extrae la fecha de publicación de AS
+        """
+        # 1. Intentar con JSON-LD primero (más confiable)
+        fecha = DateFinderInHTML.find_in_json_ld(response)
+        if fecha:
+            return DateExtractor.format_date(fecha)
+        
+        # 2. Intentar con meta tags
+        fecha = DateFinderInHTML.find_in_meta_tags(response)
+        if fecha:
+            return DateExtractor.format_date(fecha)
+        
+        # 3. Selectores específicos de AS
+        selectors_as = [
+            'time::attr(datetime)',
+            'span.a_auth_time::text',
+            'span[class*="date"]::text',
+            'span[class*="time"]::text',
+            'div.a_a_time span::text',
+            'p.a_a_time::text',
+        ]
+        
+        fecha = DateFinderInHTML.find_in_common_selectors(response, selectors_as)
+        if fecha:
+            return DateExtractor.format_date(fecha)
+        
+        # 4. Buscar en texto de autor/metadata
+        author_text = " ".join(response.css('div[class*="author"] ::text, div[class*="metadata"] ::text, div.a_a ::text').getall())
+        if author_text:
+            fecha = DateExtractor.extract_date(author_text)
+            if fecha:
+                return DateExtractor.format_date(fecha)
+        
+        return None

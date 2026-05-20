@@ -10,6 +10,8 @@ from application.load_embedings_use_case import LoadEmbeddingsUseCase
 from application.save_inverted_index import SaveInvertedIndexUseCase
 from domain.probabilistic_model import ProbabilisticModel
 from domain.i_re_rank_llm_context import IReRankLLMContext
+from application.ranking_orchestration_use_case import RankingOrchestrationUseCase
+from domain.ranking_score import RankingScore
 
 class SmartSearchUseCase:
     def __init__(
@@ -20,7 +22,8 @@ class SmartSearchUseCase:
         rag_model: IRAG,
         inverted_index: InvertedIndex,
         document_processor: IDocumentProcessor,
-        re_rank : IReRankLLMContext
+        re_rank : IReRankLLMContext,
+        doc_ranking : RankingOrchestrationUseCase
     ):
         self.show_results_use_case = show_results_use_case
         self.get_content_use_case = get_content_use_case
@@ -29,8 +32,9 @@ class SmartSearchUseCase:
         self.inverted_index = inverted_index
         self.document_processor = document_processor
         self.re_rank = re_rank
+        self.doc_ranking=doc_ranking
 
-    def execute(self, query: str) -> Tuple[list[Document], str]:
+    def execute(self, query: str) -> Tuple[list[RankingScore], str]:
 
         documents, context = self.show_results_use_case.execute(query)
         
@@ -41,16 +45,16 @@ class SmartSearchUseCase:
         score = [sc for sc, doc in  self.re_rank.re_rank_results(query, [x.get_full_text() for x , y in documents])]
 
         print(f"Score de documentos : {score}")  # Para depuración y seguimiento de resultados
-        if abs(score[0]) < 6.0:  # Si el documento más relevante tiene una puntuación baja, consideramos el contexto no relevante
-            print("El contexto recuperado no es relevante. Realizando búsqueda web...")
-            documents, context = self.get_content_use_case.execute(query)
+        # if abs(score[0]) < 6.0:  # Si el documento más relevante tiene una puntuación baja, consideramos el contexto no relevante
+        #     print("El contexto recuperado no es relevante. Realizando búsqueda web...")
+        #     documents, context = self.get_content_use_case.execute(query)
             
     
-            vec_db_thread = Thread(target=self.load_embeddings_use_case.execute, args=(documents,))
-            vec_db_thread.start()
+        #     vec_db_thread = Thread(target=self.load_embeddings_use_case.execute, args=(documents,))
+        #     vec_db_thread.start()
             
-            inverted_index_thread = Thread(target=self.async_updates_inverted_index, args=(documents,))
-            inverted_index_thread.start()
+        #     inverted_index_thread = Thread(target=self.async_updates_inverted_index, args=(documents,))
+        #     inverted_index_thread.start()
 
         document_results = []
         for item in documents:
@@ -59,9 +63,11 @@ class SmartSearchUseCase:
             else:
                 document_results.append(item)
                 
+        documents=[(x,abs(y)) for x,y in documents]
         rag_response = self.rag_model.generate_response(query, context)
+        last_ranking=self.doc_ranking.execute(document_results,query,documents)
 
-        return document_results, rag_response
+        return last_ranking, rag_response
     
     def async_updates_inverted_index(self,documents : list[Document]):
 
