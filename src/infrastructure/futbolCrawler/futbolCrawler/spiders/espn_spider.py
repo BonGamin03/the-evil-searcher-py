@@ -1,6 +1,7 @@
 from typing import Any
 import scrapy
 from scrapy.http import Response
+from futbolCrawler.date_extractor import DateFinderInHTML, DateExtractor
 
 class EspnSpider(scrapy.Spider):
     name = 'espn_spider'
@@ -34,7 +35,6 @@ class EspnSpider(scrapy.Spider):
         else:
             liga = url.split('/')[-1].replace('-', ' ').title()
 
-
         enlaces_noticias = response.css('a.realStory::attr(href)').getall()
 
         for url_noticia in enlaces_noticias:
@@ -49,7 +49,6 @@ class EspnSpider(scrapy.Spider):
                 )
 
     def parse_news(self, response: Response, liga: str):
-
         titulo = response.css('h1.article-header::text').get()
         entradilla = response.css('div.article-body h2::text').get()
         parrafos_raw = response.css('div.article-body p')
@@ -57,16 +56,56 @@ class EspnSpider(scrapy.Spider):
         texto_limpio = []
 
         for p in parrafos_raw:
-            # Igual que en Marca: extraemos texto de P y todos sus hijos
+            # Extraemos texto de P y todos sus hijos
             texto_parrafo = "".join(p.xpath('.//text()').getall()).strip()
             if texto_parrafo:
                 texto_limpio.append(texto_parrafo)
 
         if entradilla:
             texto_limpio.insert(0, entradilla.strip())
+        
+        # Extraer fecha
+        fecha = self._extract_publication_date(response)
+        
         yield {
             'liga': liga,
             'titular': titulo.strip() if titulo else None,
             'url': response.url,
-            'texto_noticia': texto_limpio
+            'texto_noticia': texto_limpio,
+            'fecha_publicacion': fecha
         }
+    
+    def _extract_publication_date(self, response: Response) -> str:
+        """
+        Extrae la fecha de publicación de ESPN
+        """
+        # 1. Intentar con JSON-LD primero (más confiable)
+        fecha = DateFinderInHTML.find_in_json_ld(response)
+        if fecha:
+            return DateExtractor.format_date(fecha)
+        
+        # 2. Intentar con meta tags
+        fecha = DateFinderInHTML.find_in_meta_tags(response)
+        if fecha:
+            return DateExtractor.format_date(fecha)
+        
+        # 3. Selectores específicos de ESPN
+        selectors_espn = [
+            'span.article-timestamp::text',
+            'div.article-header span::text',
+            'time::attr(datetime)',
+            'span[data-date]::text',
+            'span[class*="time"]::text',
+        ]
+        
+        fecha = DateFinderInHTML.find_in_common_selectors(response, selectors_espn)
+        if fecha:
+            return DateExtractor.format_date(fecha)
+        
+        # 4. Buscar en texto visible como último recurso
+        header_text = " ".join(response.css('div.article-header ::text').getall())
+        fecha = DateExtractor.extract_date(header_text)
+        if fecha:
+            return DateExtractor.format_date(fecha)
+        
+        return None

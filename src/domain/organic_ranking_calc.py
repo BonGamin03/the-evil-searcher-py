@@ -2,8 +2,8 @@ from datetime import datetime
 import re
 from typing import List, Optional
 
-from document import Document
-from ranking_score import RankingScore
+from domain.document import Document
+from domain.ranking_score import RankingScore
 
 
 class OrganicRankingCalculator:
@@ -14,29 +14,26 @@ class OrganicRankingCalculator:
         self.weights = {
             'relevance': 0.50,
             'authority': 0.30,   
-            'freshness': 0.20    
+            'freshness': 0.20    # Activado el factor de frescura
         }
 
-        # Discusion
+        # Base de datos de autoridad por dominio
         self.domain_authority = {
-            'espn.com': 95,
-            'espndeportes.espn.com': 90,
-            'marca.es': 85,
-            'as.com': 85,
-            'sport.es': 80,
-            'tudn.com': 75,
-            'fox-sports.com': 80,
-            'goal.com': 75,
-            'transfermarkt.es': 70,
-            'wikipedia.org': 90,
+            'espn': 95,
+            'espndeportes': 95,
+            'marca': 95,
+            'as': 90,
+            'sport': 80,
+            'tudn': 85,
+            
         }
 
-    def calculate_organic_rank(self,document: Document, relevance_score: float) -> RankingScore:
+    def calculate_organic_rank(self, document: Document, relevance_score: float) -> RankingScore:
         """
         Calculate organic rank combining all factors.
         """
         authority = self.calculate_authority_score(document.url)
-        freshness = self.calculate_freshness_score(document.content)
+        freshness = self.calculate_freshness_score(document)
 
         # Fórmula ponderada
         final_score = (
@@ -60,6 +57,7 @@ class OrganicRankingCalculator:
             url = url.replace('https://', '').replace('http://', '')
             url = url.replace('www.', '')
             domain = url.split('/')[0]
+            domain = url.split('.')[0]  
             return domain.lower()
         except:
             return "unknown"
@@ -79,6 +77,18 @@ class OrganicRankingCalculator:
         
         # Default
         return 50
+
+    def parse_publication_date(self, date_str: str) -> Optional[datetime]:
+        """
+        Parsea una fecha en formato YYYY-MM-DD a datetime
+        """
+        if not date_str:
+            return None
+        
+        try:
+            return datetime.strptime(date_str, '%Y-%m-%d')
+        except (ValueError, TypeError):
+            return None
 
     def extract_date_from_text(self, content: List[str]) -> Optional[datetime]:
         """
@@ -101,13 +111,21 @@ class OrganicRankingCalculator:
         
         return None
 
-    def calculate_freshness_score(self, content: List[str]) -> float:
+    def calculate_freshness_score(self, document: Document) -> float:
         """
-        Calculate  freshness score.
+        Calculate freshness score using publication_date from document.
         Recently: 90-100
         Old: 20-40
         """
-        date = self.extract_date_from_text(content)
+        date = None
+        
+        # Primero intenta usar la fecha de publicación del documento (más confiable)
+        if document.publication_date:
+            date = self.parse_publication_date(document.publication_date)
+        
+        # Si no hay fecha en metadata, intenta extraerla del contenido
+        if not date:
+            date = self.extract_date_from_text(document.content)
         
         if date:
             days_old = (datetime.now() - date).days
@@ -123,8 +141,6 @@ class OrganicRankingCalculator:
             else:
                 return 30.0
         
-         
-            
         # Si no hay fecha detectada, asumir contenido medio-fresco
         return 60.0
 

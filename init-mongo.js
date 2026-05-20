@@ -15,7 +15,8 @@ db.createCollection("documents", {
         title: { bsonType: "string" },
         league: { bsonType: "string" },
         url: { bsonType: "string" },
-        content: { bsonType: "array" , items : { bsonType: "string" } }
+        content: { bsonType: "array" , items : { bsonType: "string" } },
+        publication_date: { bsonType: "string", description: "Publication date in YYYY-MM-DD format" }
       },
       additionalProperties: true
     }

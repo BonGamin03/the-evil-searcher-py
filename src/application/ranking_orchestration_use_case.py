@@ -6,10 +6,10 @@ from enum import Enum
 from domain.document import Document
 from domain.i_document_processor import IDocumentProcessor
 from domain.i_re_rank_llm_context import IReRankLLMContext
-from local_ranking_calc import LocalRankingCalculator
-from organic_ranking_calc import OrganicRankingCalculator
-from ranking_score import ContentType, RankingScore
-from src.application.snippet_extractor_use_case import FeaturedSnippetExtractor
+from domain.local_ranking_calc import LocalRankingCalculator
+from domain.organic_ranking_calc import OrganicRankingCalculator
+from domain.ranking_score import ContentType, RankingScore
+from application.snippet_extractor_use_case import FeaturedSnippetExtractor
  
 class RankingOrchestrationUseCase:
      
@@ -32,13 +32,13 @@ class RankingOrchestrationUseCase:
 
         for document in documents:
             
-            relevance_score = prob_scores_dict.get(document.id)
+            relevance_score = prob_scores_dict.get(document.id,0)
             ranking = self.organic_calculator.calculate_organic_rank(document,relevance_score)
             local_bonus = self.local_calculator.calculate_local_relevance(document,user_location)
             ranking.final_score += local_bonus
-            snippet, confidence = self.snippet_extractor.extract_featured_snippet(query,document)
-            ranking.featured_snippet = snippet
-            ranking.snippet_confidence = confidence
+            #snippet, confidence = self.snippet_extractor.extract_featured_snippet(query,document)
+            #ranking.featured_snippet = snippet
+            #ranking.snippet_confidence = confidence
             ranking.content_type = self._classify_content_type(document)
             ranking_scores.append(ranking)
 

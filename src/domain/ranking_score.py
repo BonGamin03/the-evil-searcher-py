@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
-from document import Document
+from domain.document import Document
 
 
 class ContentType(Enum):

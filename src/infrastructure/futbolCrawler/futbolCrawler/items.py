@@ -8,5 +8,8 @@ import scrapy
 
 class FutbolcrawlerItem(scrapy.Item):
     # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+    liga = scrapy.Field()
+    titular = scrapy.Field()
+    url = scrapy.Field()
+    texto_noticia = scrapy.Field()
+    fecha_publicacion = scrapy.Field()  # Fecha en formato YYYY-MM-DD
