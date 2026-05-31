@@ -18,6 +18,7 @@ from infrastructure.zenserp_searcher import ZenserpSearcher
 from infrastructure.re_rank_chunks import ReRankCTexts
 from application.run_scraper_use_case import RunFullScraperUseCase
 from application.ranking_orchestration_use_case import RankingOrchestrationUseCase
+from infrastructure.word2vec_query_expander import Word2VecQueryExpander
 
 def main():
     print("Conectando a MongoDB...")
@@ -30,6 +31,7 @@ def main():
     vector_repo = ChromaVectorRepository()
     document_processor = DocumentProcessor()
     re_rank_text = ReRankCTexts()
+    query_expander = Word2VecQueryExpander(document_repo, document_processor)
     
     builder = BuildInvertedIndexUseCase(document_repo, document_processor)
     inverted_index = builder.execute()
@@ -58,8 +60,8 @@ def main():
         inverted_index=inverted_index,
         document_processor=document_processor,
         re_rank= re_rank_text,
-        doc_ranking=ranking
-
+        doc_ranking=ranking,
+        query_expander=query_expander
     )
     
     print("Inicializando caso de uso de búsqueda...")

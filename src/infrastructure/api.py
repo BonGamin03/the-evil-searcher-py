@@ -17,6 +17,7 @@ from application.get_content_search_use_case import GetContentSearchUseCase
 from infrastructure.zenserp_searcher import ZenserpSearcher
 from infrastructure.re_rank_chunks import ReRankCTexts
 from application.ranking_orchestration_use_case import RankingOrchestrationUseCase
+from infrastructure.word2vec_query_expander import Word2VecQueryExpander
 
 app = FastAPI(title="The Evil Searcher API ")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -26,19 +27,20 @@ doc_repo = DocumentRepository(db)
 doc_proccesor=DocumentProcessor()
 vec_repo = ChromaVectorRepository()
 embedding_gen=HGEmbeddingGen()
-rag_gen=MetaLLamaRAG("aaa")
+rag_gen=MetaLLamaRAG("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")
 builder_index=BuildInvertedIndexUseCase(doc_repo,doc_proccesor)
 embeddings=LoadEmbeddingsUseCase(doc_repo,embedding_gen,vec_repo)
 inverted_index=builder_index.execute()
-web_searcher=ZenserpSearcher('API-KEY')
+web_searcher=ZenserpSearcher('15b69a40-4b14-11f1-8fd9-734ce4fa9350')
 get_content=GetContentSearchUseCase(web_searcher,doc_repo)
+query_expander=Word2VecQueryExpander(doc_repo,doc_proccesor)
 re_rank=ReRankCTexts()
 final_ranking=RankingOrchestrationUseCase(doc_proccesor,re_rank)
 #embeddings.execute()
 
 def get_search_use_case():
      show_result= ShowResultsUseCase(doc_repo,inverted_index,doc_proccesor,vec_repo,embedding_gen,re_rank)
-     return SmartSearchUseCase(show_result,get_content,embeddings,rag_gen,inverted_index,doc_proccesor,re_rank,final_ranking)
+     return SmartSearchUseCase(show_result,get_content,embeddings,rag_gen,inverted_index,doc_proccesor,re_rank,final_ranking, query_expander)
 def get_scraper_use_case():
      return RunFullScraperUseCase()
 

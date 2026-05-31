@@ -1,7 +1,9 @@
+version: '3.8'
+
 services:
   mongodb:
     image: mongo:7
-    container_name: mongodb
+    container_name: evil_mongodb
     ports:
       - "${MONGODB_PORT:-27017}:27017"
     environment:
@@ -11,6 +13,32 @@ services:
     volumes:
       - mongo_data:/data/db
       - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+
+  api:
+    build: 
+      context: .
+      dockerfile: dockerfile.backend
+    container_name: evil_api
+    ports:
+      - "8000:8000"
+    environment:
+      MONGO_URI: "mongodb://admin:admin@mongodb:27017/evil_searcher?authSource=admin"
+      CHROMADB_URI: "./chroma_data"
+    volumes:
+      - ./chroma_data:/app/src/chroma_data
+      - ./lsaModel:/app/src/lsaModel
+    depends_on:
+      - mongodb
+
+  frontend:
+    build:
+      context: .
+      dockerfile: dockerfile.frontend
+    container_name: evil_frontend
+    ports:
+      - "5173:5173" # Exponemos el puerto directo de Vite
+    depends_on:
+      - api
 
 volumes:
   mongo_data:
