@@ -28,7 +28,7 @@ class RankingOrchestrationUseCase:
                 user_location: str = None) -> List[RankingScore]:
         
         ranking_scores = []
-        prob_scores_dict = {doc.id: score for doc, score in probabilistic_scores}
+        prob_scores_dict = {doc.id: score for doc, score in probabilistic_scores} if probabilistic_scores else {}
 
         for document in documents:
             

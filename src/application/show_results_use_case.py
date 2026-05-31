@@ -63,5 +63,4 @@ class ShowResultsUseCase:
         # Preparar contexto y consultar al RAG
         context_str = "\n...\n".join(chunk for score, chunk in context_chunks[:10]) 
 
-
         return documents, context_str

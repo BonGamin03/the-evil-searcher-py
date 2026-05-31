@@ -1,0 +1,17 @@
+# Dockerfile.frontend
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copiar configuración y dependencias
+COPY frontend/package*.json ./
+RUN npm install
+
+# Copiar el resto del código
+COPY frontend/ ./
+
+# Exponer el puerto por defecto de Vite
+EXPOSE 5173
+
+# Arrancamos en modo dev y le decimos a Vite que escuche en todas las interfaces de red del contenedor
+CMD ["npm", "run", "dev", "--", "--host"]
