@@ -5,7 +5,6 @@ from pymongo import MongoClient
 from application.run_scraper_use_case import RunFullScraperUseCase
 from application.show_results_use_case import ShowResultsUseCase
 from infrastructure.document_repository import DocumentRepository
-from infrastructure.lsa_embedding_generator import LSAEmbeddingGenerator
 from infrastructure.meta_llama_rag import MetaLLamaRAG
 from infrastructure.vector_repository import ChromaVectorRepository
 from application.build_inverted_index import BuildInvertedIndexUseCase
@@ -27,11 +26,11 @@ doc_repo = DocumentRepository(db)
 doc_proccesor=DocumentProcessor()
 vec_repo = ChromaVectorRepository()
 embedding_gen=HGEmbeddingGen()
-rag_gen=MetaLLamaRAG("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")
+rag_gen=MetaLLamaRAG("HG_TOKEN")
 builder_index=BuildInvertedIndexUseCase(doc_repo,doc_proccesor)
 embeddings=LoadEmbeddingsUseCase(doc_repo,embedding_gen,vec_repo)
 inverted_index=builder_index.execute()
-web_searcher=ZenserpSearcher('15b69a40-4b14-11f1-8fd9-734ce4fa9350')
+web_searcher=ZenserpSearcher('API-KEY')
 get_content=GetContentSearchUseCase(web_searcher,doc_repo)
 query_expander=Word2VecQueryExpander(doc_repo,doc_proccesor)
 re_rank=ReRankCTexts()
