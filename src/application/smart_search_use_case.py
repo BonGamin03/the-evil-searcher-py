@@ -14,6 +14,7 @@ from application.ranking_orchestration_use_case import RankingOrchestrationUseCa
 from domain.ranking_score import RankingScore
 from domain.i_query_expander import IQueryExpander
 
+
 class SmartSearchUseCase:
     def __init__(
         self,
@@ -60,6 +61,9 @@ class SmartSearchUseCase:
             
             inverted_index_thread = Thread(target=self.async_updates_inverted_index, args=(documents,))
             inverted_index_thread.start()
+
+            word2vec_thread = Thread(target=self.query_expander._train_model)
+            word2vec_thread.start()
 
         document_results = []
         for item in documents:
