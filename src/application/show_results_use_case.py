@@ -50,7 +50,7 @@ class ShowResultsUseCase:
             
             document = fetched_docs.get(doc_id)
             
-            print(f"Documento ID: {doc_id}, Chunk ID: {chunk_id}")  # Para depuración y seguimiento de resultados
+             
             if chunk_id == 0:
                 context_chunks.append(document.content[0])
             else:
@@ -60,7 +60,7 @@ class ShowResultsUseCase:
                     context_chunks.append(document.content[chunk_id + 1])
 
         context_chunks = self.re_rank_chunk.re_rank_results(query, context_chunks)
-        print(context_chunks[:10])
+         
         # Preparar contexto y consultar al RAG
         context_str = "\n...\n".join(chunk for score, chunk in context_chunks[:50]) 
 

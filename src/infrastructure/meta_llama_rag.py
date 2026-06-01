@@ -20,7 +20,7 @@ class MetaLLamaRAG(IRAG):
             response = self.client.chat_completion(
                 messages,
                 max_tokens=300,  
-                temperature=0.3 #Midly creative to allow for more natural responses while still being relevant to the context
+                temperature=0.5 #Midly creative to allow for more natural responses while still being relevant to the context
             )
             
             return response.choices[0].message.content

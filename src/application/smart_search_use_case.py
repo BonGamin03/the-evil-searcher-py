@@ -28,7 +28,7 @@ class SmartSearchUseCase:
         doc_ranking : RankingOrchestrationUseCase,
         query_expander : IQueryExpander
     ):
-        self.show_results_use_case = show_results_use_case
+        self. show_results_use_case = show_results_use_case
         self.get_content_use_case = get_content_use_case
         self.load_embeddings_use_case = load_embeddings_use_case
         self.rag_model = rag_model
