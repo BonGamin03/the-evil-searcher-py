@@ -22,9 +22,9 @@ class OrganicRankingCalculator:
             'espn': 95,
             'espndeportes': 95,
             'marca': 95,
-            'as': 90,
-            'sport': 80,
-            'tudn': 85,
+            'as': 95,
+            'sport': 95,
+            'tudn': 95,
             
         }
 
