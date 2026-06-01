@@ -1,7 +1,7 @@
 from fastapi import FastAPI , Query , Depends, Path
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
-
+import time
 from application.run_scraper_use_case import RunFullScraperUseCase
 from application.show_results_use_case import ShowResultsUseCase
 from infrastructure.document_repository import DocumentRepository
@@ -29,13 +29,15 @@ embedding_gen=HGEmbeddingGen()
 rag_gen=MetaLLamaRAG("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")
 builder_index=BuildInvertedIndexUseCase(doc_repo,doc_proccesor)
 embeddings=LoadEmbeddingsUseCase(doc_repo,embedding_gen,vec_repo)
+start_index = time.time()
 inverted_index=builder_index.execute()
+end_index = time.time()
+print(f"Índice invertido construido con éxito en {end_index - start_index} segundos.")
 web_searcher=ZenserpSearcher('15b69a40-4b14-11f1-8fd9-734ce4fa9350')
 get_content=GetContentSearchUseCase(web_searcher,doc_repo)
 query_expander=Word2VecQueryExpander(doc_repo,doc_proccesor)
 re_rank=ReRankCTexts()
 final_ranking=RankingOrchestrationUseCase(doc_proccesor,re_rank)
-#embeddings.execute()
 
 def get_search_use_case():
      show_result= ShowResultsUseCase(doc_repo,inverted_index,doc_proccesor,vec_repo,embedding_gen,re_rank)
@@ -93,7 +95,4 @@ def get_article(doc_id: int = Path(..., description="ID del documento")):
         "full_text": doc.get_full_text()
     }
 
-@app.get("/scraper")
-def search(use_case=Depends(get_scraper_use_case)):
-    use_case.execute()
-    return {"results":"ok"}
+ 

@@ -13,13 +13,7 @@ class BuildInvertedIndexUseCase:
         self.index_path = index_path
     
     def execute(self) -> InvertedIndex:
-        # Si el índice ya existe en disco, lo cargamos
-        if os.path.exists(self.index_path):
-            print(f"Cargando índice desde {self.index_path}...")
-            inverted_index = InvertedIndex()
-            inverted_index._index = joblib.load(self.index_path)
-            
-            return inverted_index
+         
 
         print("Construyendo índice desde cero...")
         inverted_index = InvertedIndex()
@@ -28,8 +22,7 @@ class BuildInvertedIndexUseCase:
             terms = self.doc_processor.process_document(doc)
             inverted_index.add_document(doc.id, terms)
 
-        save_inverte_index = SaveInvertedIndexUseCase()
-        save_inverte_index.execute(inverted_index)
+         
 
         return inverted_index
 
