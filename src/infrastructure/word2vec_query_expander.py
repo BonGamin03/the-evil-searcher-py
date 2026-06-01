@@ -23,9 +23,9 @@ class Word2VecQueryExpander(IQueryExpander):
             print(f"Cargando modelo Word2Vec desde {self.model_path}...")
             self.model = Word2Vec.load(self.model_path)
         else:
-            self._train_model()
+            self.train_model()
 
-    def _train_model(self):
+    def train_model(self):
         print("Entrenando modelo Word2Vec con el corpus de documentos...")
         docs = self.doc_repo.get_all_documents()
         
