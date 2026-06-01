@@ -7,5 +7,5 @@ class SaveInvertedIndexUseCase:
         self.index_path = index_path
 
     def execute(self, inverted_index: InvertedIndex) -> None:
-        sys.setrecursionlimit(10000)
+        sys.setrecursionlimit(10000000)
         joblib.dump(inverted_index._index, self.index_path)

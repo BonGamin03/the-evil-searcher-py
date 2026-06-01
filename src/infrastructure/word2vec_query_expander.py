@@ -1,4 +1,5 @@
 import os
+import sys
 from gensim.models import Word2Vec
 from domain.i_query_expander import IQueryExpander
 from domain.i_document_repository import IDocumentRepository
@@ -43,6 +44,7 @@ class Word2VecQueryExpander(IQueryExpander):
             workers=4,
             epochs=30
         )
+        sys.setrecursionlimit(10000000)
         self.model.save(self.model_path)
         print("Modelo Word2Vec entrenado y guardado con éxito.")
 

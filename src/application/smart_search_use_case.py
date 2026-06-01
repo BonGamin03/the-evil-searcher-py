@@ -62,7 +62,7 @@ class SmartSearchUseCase:
             inverted_index_thread = Thread(target=self.async_updates_inverted_index, args=(documents,))
             inverted_index_thread.start()
 
-            word2vec_thread = Thread(target=self.query_expander._train_model)
+            word2vec_thread = Thread(target=self.query_expander.train_model)
             word2vec_thread.start()
 
         document_results = []
@@ -85,8 +85,7 @@ class SmartSearchUseCase:
             terms = self.document_processor.process_document(doc)
             self.inverted_index.add_document(doc.id, terms)
 
-        save_inverted_index = SaveInvertedIndexUseCase()
-        save_inverted_index.execute(self.inverted_index)
+        
         print("Índice invertido actualizado con nuevos documentos.")
 
 
