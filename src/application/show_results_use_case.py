@@ -60,7 +60,8 @@ class ShowResultsUseCase:
                     context_chunks.append(document.content[chunk_id + 1])
 
         context_chunks = self.re_rank_chunk.re_rank_results(query, context_chunks)
+        print(context_chunks[:10])
         # Preparar contexto y consultar al RAG
-        context_str = "\n...\n".join(chunk for score, chunk in context_chunks[:10]) 
+        context_str = "\n...\n".join(chunk for score, chunk in context_chunks[:50]) 
 
         return documents, context_str

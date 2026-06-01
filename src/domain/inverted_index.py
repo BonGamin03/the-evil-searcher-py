@@ -2,7 +2,7 @@ from collections import defaultdict,Counter
 from domain.skiplist import SkipList
 class InvertedIndex:
     def __init__(self):
-        #Duda sobre campos private
+         
         self._index = defaultdict(SkipList)
         self._words=0
     
