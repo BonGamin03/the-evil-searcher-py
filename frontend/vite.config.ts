@@ -9,5 +9,11 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    
+  },
+    server: {
+    host: true,        // Equivalente a --host: escucha en 0.0.0.0 dentro del contenedor
+    port: 5173,
+    strictPort: true,
   },
 })

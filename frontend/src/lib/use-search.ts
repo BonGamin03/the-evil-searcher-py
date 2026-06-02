@@ -15,7 +15,7 @@ export interface SearchResponse {
   rag: string;       // El texto generado por el LLM/RAG
   results: SearchResult[];    // Los resultados de búsqueda tradicionales
 }
-
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 // const data: SearchResult[] = [
 //   {
 //     id: "1",
@@ -69,7 +69,7 @@ export function useSearch() {
 
     try {
       
-      const response = await axios.get(`http://localhost:8000/search?query=${encodeURIComponent(query)}`);
+      const response = await axios.get(`${API_URL}/search?query=${encodeURIComponent(query)}`);
       console.log("API Response:", response.data);
       setContextResults(response.data); // Guardar globalmente para que persista
     } catch (err) {

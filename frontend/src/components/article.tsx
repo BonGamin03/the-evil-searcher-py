@@ -11,7 +11,7 @@ interface Article {
   content: string[];
   full_text: string;
 }
-
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 export function Article() {
   const params = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ export function Article() {
     const fetchArticle = async () => {
       try {
         const docId = params.id;
-        const response = await fetch(`http://localhost:8000/article/${docId}`);
+        const response = await fetch(`${API_URL}/article/${docId}`);
         
         if (!response.ok) {
           throw new Error("Error al cargar el artículo");

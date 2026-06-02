@@ -9,8 +9,12 @@ from infrastructure.futbolCrawler.futbolCrawler.spiders.as_spider import AsSpide
 from infrastructure.futbolCrawler.futbolCrawler.spiders.marca_spider import MarcaSpider
 from infrastructure.futbolCrawler.futbolCrawler.spiders.espn_spider import EspnSpider
 from infrastructure.futbolCrawler.futbolCrawler.spiders.tudn_spider import TudnSpider
+from infrastructure.word2vec_query_expander import Word2VecQueryExpander
 
 class RunFullScraperUseCase:
+    
+    def __init__(self, query_expander: Word2VecQueryExpander = None):
+        self.query_expander = query_expander
     def execute(self) -> None:
         
         src_dir = Path(__file__).resolve().parents[1]                 # .../src
@@ -28,3 +32,5 @@ class RunFullScraperUseCase:
         process.crawl(EspnSpider)
         process.crawl(TudnSpider)
         process.start()  # bloquea hasta terminar
+        print("Iniciando reentrenamiento automático de Word2Vec...")
+        self.query_expander.train_model()
