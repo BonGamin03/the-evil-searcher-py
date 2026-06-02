@@ -13,5 +13,5 @@ COPY frontend/ ./
 # Exponer el puerto por defecto de Vite
 EXPOSE 5173
 
-# Arrancamos en modo dev y le decimos a Vite que escuche en todas las interfaces de red del contenedor
+# Arrancamos en modo dev escuchando en todas las interfaces de red del contenedor
 CMD ["npm", "run", "dev", "--", "--host"]

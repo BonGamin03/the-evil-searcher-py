@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI , Query , Depends, Path
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
@@ -20,20 +21,29 @@ from infrastructure.word2vec_query_expander import Word2VecQueryExpander
 
 app = FastAPI(title="The Evil Searcher API ")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
-mongo_client = MongoClient("mongodb://admin:admin@localhost:27017/evil_searcher?authSource=admin")
+# ── Configuración desde variables de entorno ──────────────────────────────────
+MONGO_URI = os.getenv(
+    "MONGO_URI",
+    "mongodb://admin:admin@mongodb:27017/evil_searcher?authSource=admin",
+)
+# ... después de MONGO_URI
+HF_TOKEN = os.getenv("HF_TOKEN", "default_hf_key")
+ZENSERP_API_KEY = os.getenv("ZENSERP_API_KEY", "default_zenserp_key")
+
+mongo_client = MongoClient(MONGO_URI)
 db = mongo_client["evil_searcher"]
 doc_repo = DocumentRepository(db)
 doc_proccesor=DocumentProcessor()
 vec_repo = ChromaVectorRepository()
 embedding_gen=HGEmbeddingGen()
-rag_gen=MetaLLamaRAG("API_KEY")
+rag_gen=MetaLLamaRAG(HF_TOKEN)
 builder_index=BuildInvertedIndexUseCase(doc_repo,doc_proccesor)
 embeddings=LoadEmbeddingsUseCase(doc_repo,embedding_gen,vec_repo)
 start_index = time.time()
 inverted_index=builder_index.execute()
 end_index = time.time()
 print(f"Índice invertido construido con éxito en {end_index - start_index} segundos.")
-web_searcher=ZenserpSearcher('API_KEY')
+web_searcher=ZenserpSearcher(ZENSERP_API_KEY)
 get_content=GetContentSearchUseCase(web_searcher,doc_repo)
 query_expander=Word2VecQueryExpander(doc_repo,doc_proccesor)
 re_rank=ReRankCTexts()
