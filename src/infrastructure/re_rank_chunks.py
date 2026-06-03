@@ -9,7 +9,7 @@ class ReRankCTexts(IReRankLLMContext):
         pairs = [[query, chunk] for chunk in retrieved_text]
         
         # Obtenemos las puntuaciones de relevancia
-        scores = self.model.predict(pairs)
+        scores = self.model.predict(pairs).tolist()
 
         # Combinamos los chunks con sus puntuaciones y ordenamos
         scored_results = sorted(zip(scores, retrieved_text), key=lambda x: x[0], reverse=True)

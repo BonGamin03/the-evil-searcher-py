@@ -11,7 +11,7 @@ class HGEmbeddingGen(IEmbeddingGenerator):
         return self.text_to_embedding(full_text)
 
     def text_to_embedding(self, text : str) -> list[float]:
-        return self.embedding_model.encode(text)
+        return self.embedding_model.encode(text).tolist()
   
 
     

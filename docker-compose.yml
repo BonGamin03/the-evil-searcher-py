@@ -32,11 +32,10 @@ services:
     environment:
       MONGO_URI: "mongodb://${MONGO_INITDB_ROOT_USERNAME:-admin}:${MONGO_INITDB_ROOT_PASSWORD:-admin}@mongodb:27017/${MONGO_INITDB_DATABASE:-evil_searcher}?authSource=admin"
       CHROMADB_URI: "./chroma_data"
-      HF_TOKEN: ${HF_TOKEN:-"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"}
-      ZENSERP_API_KEY: ${ZENSERP_API_KEY:-"15b69a40-4b14-11f1-8fd9-734ce4fa9350"}
+      HF_TOKEN: ${HF_TOKEN:-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}
+      ZENSERP_API_KEY: ${ZENSERP_API_KEY:-15b69a40-4b14-11f1-8fd9-734ce4fa9350}
     volumes:
       - chroma_data:/app/src/chroma_data
-      - lsa_model:/app/src/lsaModel
       - w2v_model:/app/src/w2v_model
     depends_on:
       mongodb:
@@ -58,5 +57,4 @@ services:
 volumes:
   mongo_data:
   chroma_data:
-  lsa_model:
   w2v_model:
