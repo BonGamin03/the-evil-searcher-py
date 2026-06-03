@@ -16,8 +16,8 @@ RUN apt-get update && apt-get install -y \
 
 # Copiar e instalar los requerimientos
 COPY requirements.txt .
-RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --default-timeout=1000 torch --index-url https://download.pytorch.org/whl/cpu
+RUN pip install --no-cache-dir --default-timeout=1000 -r requirements.txt
 
 # Descargar el modelo de NLP de spaCy
  
@@ -26,7 +26,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ ./src/
 
 # Copiar el modelo Word2Vec si existe (puede no existir en primera ejecución)
-COPY src/w2v_futbol.model   2>/dev/null 
+COPY src/w2v_futbol.mode[l]   2>/dev/null 
 
 # Directorio de trabajo para que funcionen los imports relativos
 WORKDIR /app/src

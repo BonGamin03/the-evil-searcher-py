@@ -33,6 +33,12 @@ class Word2VecQueryExpander(IQueryExpander):
         # Procesamos cada documento usando tu DocumentProcessor para mantener 
         # las mismas reglas de limpieza (lematización, stopwords) que el índice
         corpus = [self.doc_processor.process_document(doc) for doc in docs]
+        # Si no hay documentos, no entrenar
+        corpus = [c for c in corpus if c]  # filtrar listas vacías
+        if not corpus:
+             
+            self.model = None
+            return
         
         # Entrenamos el modelo. 
         # vector_size=100 es ideal para corpus pequeños/medianos. window=5 es el contexto.
@@ -56,7 +62,8 @@ class Word2VecQueryExpander(IQueryExpander):
         # Procesamos la query original para que coincida con el vocabulario
         query_terms = self.doc_processor.process_query(query)
         expanded_terms = set(query_terms)
-
+        if self.model is None:
+            return query
         for term in query_terms:
             if term in self.model.wv:
                 # Buscamos los términos más cercanos en el espacio vectorial

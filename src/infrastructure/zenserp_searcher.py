@@ -19,7 +19,7 @@ class ZenserpSearcher(IWebSearcher):
             ("tbm", "nws"),
             ("hl", "es"),
         )
-        
+        print(self.api_key)
         response = requests.get(self.url, headers=headers, params=params)
         response.raise_for_status()
         
