@@ -5,7 +5,7 @@ class MetaLLamaRAG(IRAG):
     def __init__(self, hf_token: str):
          
          self.client = InferenceClient(
-            model="meta-llama/Llama-3.1-8B-Instruct",
+            model="meta-llama/Llama-3.1-8B-Instruct:novita",
             token= hf_token
         )
 

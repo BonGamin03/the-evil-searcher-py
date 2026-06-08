@@ -1,5 +1,5 @@
 # Dockerfile.backend
-FROM python:3.10-slim
+FROM python:3.13-slim
 
 # Evita que Python escriba archivos .pyc y fuerza el output en la terminal
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -8,11 +8,11 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 # Instalar dependencias del sistema necesarias para compilar algunas librerías
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libxml2-dev \
-    libxslt-dev \
-    && rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && apt-get install -y \
+#     build-essential \
+#     libxml2-dev \
+#     libxslt-dev \
+#     && rm -rf /var/lib/apt/lists/*
 
 # Copiar e instalar los requerimientos
 COPY requirements.txt .
@@ -21,7 +21,7 @@ RUN pip install --no-cache-dir --default-timeout=1000 -r requirements.txt
 
 # Descargar el modelo de NLP de spaCy
  
-
+COPY .env .
 # Copiar el código fuente
 COPY src/ ./src/
 

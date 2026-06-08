@@ -10,7 +10,7 @@ class Word2VecQueryExpander(IQueryExpander):
         self, 
         doc_repo: IDocumentRepository, 
         doc_processor: IDocumentProcessor, 
-        model_path: str = "./w2v_futbol.model"
+        model_path: str = "./w2v_model/w2v_futbol.model"
     ):
         self.doc_repo = doc_repo
         self.doc_processor = doc_processor
@@ -50,6 +50,7 @@ class Word2VecQueryExpander(IQueryExpander):
             workers=4,
             epochs=30
         )
+        os.makedirs(os.path.dirname(self.model_path), exist_ok=True)
         sys.setrecursionlimit(10000000)
         self.model.save(self.model_path)
         print("Modelo Word2Vec entrenado y guardado con éxito.")
