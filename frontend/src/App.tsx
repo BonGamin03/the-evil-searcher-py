@@ -10,6 +10,7 @@ import { Loading } from "./components/loading"
 import { AIInformation } from "./components/ai-information"
 import { Routes, Route } from "react-router-dom"
 import { SearchProvider, useSearchContext } from "./context/SearchContext"
+import { AuthPanel } from "./components/auth-panel"
 
 function HomePage() {
    const { results, isLoading, hasSearched, error, performSearch } = useSearch();
@@ -72,7 +73,8 @@ function App() {
     <SearchProvider>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<AuthPanel />} />
+          <Route path="/search" element={<HomePage />} />
           <Route path="/article/:id" element={<Article />} />
         </Routes>
       </ThemeProvider>
