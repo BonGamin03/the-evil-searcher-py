@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI , Query , Depends, Path, HTTPException,params
+from fastapi import FastAPI , Query , Depends, Path, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pymongo import MongoClient
@@ -119,7 +119,7 @@ def search(query: str = Query(..., min_length=1),location: str = Query(None),use
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/article/{doc_id}")
-def get_article(doc_id: int = Path(..., description="ID del documento"),userEmail:str=params(...,description="Email del usuario")):
+def get_article(doc_id: int = Path(..., description="ID del documento"),userEmail: str = Query(..., description="Email del usuario")):
     """Retorna el contenido completo de un artículo"""
     try:
         doc = doc_repo.get_document(doc_id)

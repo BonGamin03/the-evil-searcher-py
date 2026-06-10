@@ -18,3 +18,8 @@ class IVectorRepository(ABC):
     ) -> list[tuple[int,int]]:
         """Query the vector store for the most similar embeddings to the query_embedding"""
         pass
+
+    @abstractmethod   
+    def get_doc_centroids_batch(self, doc_ids: list[int]) -> dict[int, list[float]]:
+        """Get the centroid embeddings for a batch of document IDs."""
+        pass

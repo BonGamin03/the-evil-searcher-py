@@ -1,4 +1,5 @@
 import chromadb
+import numpy as np
 from domain.i_vector_repository import IVectorRepository
 class ChromaVectorRepository(IVectorRepository):
     def __init__(self, persist_path: str = "./chroma_data", collection_name: str = "documents"):
@@ -36,3 +37,21 @@ class ChromaVectorRepository(IVectorRepository):
     #No me consta de que esto esté bien implementado ni que sea necesario 
     def delete(self, doc_id):
         return super().delete(doc_id)
+    
+    def get_doc_centroids_batch(self, doc_ids: list[int]) -> dict[int, list[float]]:
+        results = self._collection.get(
+                where={"doc_id": {"$in": doc_ids}},
+                include=["embeddings", "metadatas"],
+            )
+            # Agrupar embeddings por doc_id
+        groups: dict[int, list[np.ndarray]] = {}
+        for emb, meta in zip(results["embeddings"], results["metadatas"]):
+                did = meta["doc_id"]
+                groups.setdefault(did, []).append(np.array(emb))
+ 
+        centroids = {}
+        for did, embs in groups.items():
+                c = np.mean(embs, axis=0)
+                norm = np.linalg.norm(c)
+                centroids[did] = (c / norm).tolist() if norm > 0 else c.tolist()
+        return centroids
