@@ -4,7 +4,9 @@ import { Input } from "./ui/input"
 import { Label } from "./ui/label"
 import { useNavigate } from "react-router-dom"
 import { Header } from "./header"
+import axios from "axios"
 
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 export function AuthPanel() {
   const [mode, setMode] = useState<"login" | "register">("login")
   const [email, setEmail] = useState("")
@@ -12,7 +14,7 @@ export function AuthPanel() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [errors, setErrors] = useState<Record<string, string>>({})
   const navigate = useNavigate()
-
+  
   const validate = () => {
     const newErrors: Record<string, string> = {}
     
@@ -40,13 +42,20 @@ export function AuthPanel() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (validate()) {
-      // Simular login/registro exitoso
-      navigate("/search")
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (validate()) {
+    const endpoint = mode === "login" ? "/login" : "/register";
+    const response= await axios.post(`${API_URL}${endpoint}`, { email, password });
+    if (response.status === 200) {
+       
+      localStorage.setItem("userEmail", response.data.email); // Guardar identificador
+      navigate("/search");
+    } else {
+      setErrors({ email: "Error en la autenticación" });
     }
   }
+};
 
   return (
     <div className="relative flex flex-col min-h-svh w-full bg-background font-sans antialiased items-center justify-center p-4">

@@ -1,6 +1,7 @@
 import os
-from fastapi import FastAPI , Query , Depends, Path
+from fastapi import FastAPI , Query , Depends, Path, HTTPException,params
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from pymongo import MongoClient
 import time
 from application.run_scraper_use_case import RunFullScraperUseCase
@@ -18,10 +19,18 @@ from infrastructure.zenserp_searcher import ZenserpSearcher
 from infrastructure.re_rank_chunks import ReRankCTexts
 from application.ranking_orchestration_use_case import RankingOrchestrationUseCase
 from infrastructure.word2vec_query_expander import Word2VecQueryExpander
+from infrastructure.user_repository import UserRepository
+from application.register_user_use_case import RegisterUserUseCase
+from application.login_user_use_case import LoginUserUseCase
 
 app = FastAPI(title="The Evil Searcher API ")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
-# ── Configuración desde variables de entorno ──────────────────────────────────
+
+class UserCreate(BaseModel):
+    email: str
+    password: str
+
+ # ── Configuración desde variables de entorno ──────────────────────────────────
 MONGO_URI = os.getenv(
     "MONGO_URI",
     "mongodb://admin:admin@mongodb:27017/evil_searcher?authSource=admin",
@@ -32,6 +41,9 @@ ZENSERP_API_KEY = os.getenv("ZENSERP_API_KEY", "default_zenserp_key")
 
 mongo_client = MongoClient(MONGO_URI)
 db = mongo_client["evil_searcher"]
+user_repo = UserRepository(db)
+register_use_case = RegisterUserUseCase(user_repo)
+login_use_case = LoginUserUseCase(user_repo)
 doc_repo = DocumentRepository(db)
 doc_proccesor=DocumentProcessor()
 vec_repo = ChromaVectorRepository()
@@ -55,54 +67,75 @@ def get_search_use_case():
 def get_scraper_use_case():
      return RunFullScraperUseCase()
 
+@app.post("/register")
+def register(user_data: UserCreate):
+    try:
+        user = register_use_case.execute(user_data.email, user_data.password)
+        return {"message": "User created successfully", "email": user.email}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/login")
+def login(user_data: UserCreate):
+    try:
+        user = login_use_case.execute(user_data.email, user_data.password)
+        return {"message": "Login successful", "email": user.email, "read_docs": user.read_docs}
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail=str(e))
+
 @app.get("/search")
 def search(query: str = Query(..., min_length=1),location: str = Query(None),use_case: SmartSearchUseCase = Depends(get_search_use_case)
 ):
-    ranked_results, rag = use_case.execute(query, user_location=location)
-    
-    # Convertir RankingScore a diccionario
-    results_dict = []
-    for ranked in ranked_results:
-        result_item = {
-            "id": ranked.document.id,
-            "title": ranked.document.title,
-            "url": ranked.document.url,
-            "league": ranked.document.league,
-            "content": ranked.document.content,
-            # Metadatos de ranking
-            "relevance_score": round(ranked.relevance_score, 2),
-            "authority_score": round(ranked.authority_score, 2),
-            "freshness_score": round(ranked.freshness_score, 2),
-            "final_score": round(ranked.final_score, 2),
-            "ranking_type": ranked.ranking_type,
-            "content_type": ranked.content_type.value,
-            "featured_snippet": ranked.featured_snippet,
-            "snippet_confidence": round(ranked.snippet_confidence, 2),
+    try:
+        ranked_results, rag = use_case.execute(query, user_location=location)
+        
+        # Convertir RankingScore a diccionario
+        results_dict = []
+        for ranked in ranked_results:
+            result_item = {
+                "id": ranked.document.id,
+                "title": ranked.document.title,
+                "url": ranked.document.url,
+                "league": ranked.document.league,
+                "content": ranked.document.content,
+                # Metadatos de ranking
+                "relevance_score": round(ranked.relevance_score, 2),
+                "authority_score": round(ranked.authority_score, 2),
+                "freshness_score": round(ranked.freshness_score, 2),
+                "final_score": round(ranked.final_score, 2),
+                "ranking_type": ranked.ranking_type,
+                "content_type": ranked.content_type.value,
+                "featured_snippet": ranked.featured_snippet,
+                "snippet_confidence": round(ranked.snippet_confidence, 2),
+            }
+            results_dict.append(result_item)
+        
+        return {
+            "query": query,
+            "results": results_dict,
+            "rag": rag
         }
-        results_dict.append(result_item)
-    
-    return {
-        "query": query,
-        "results": results_dict,
-        "rag": rag
-    }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/article/{doc_id}")
-def get_article(doc_id: int = Path(..., description="ID del documento")):
+def get_article(doc_id: int = Path(..., description="ID del documento"),userEmail:str=params(...,description="Email del usuario")):
     """Retorna el contenido completo de un artículo"""
-    
-    doc = doc_repo.get_document(doc_id)
-    
-    if not doc:
-        return {"error": "Documento no encontrado"}
-    
-    return {
-        "id": doc.id,
-        "title": doc.title,
-        "url": doc.url,
-        "league": doc.league,
-        "content": doc.content,
-        "full_text": doc.get_full_text()
-    }
+    try:
+        doc = doc_repo.get_document(doc_id)
+        user_repo.update_read_docs(userEmail, doc_id)  # Actualiza los documentos leídos por el usuario
+        if not doc:
+            return {"error": "Documento no encontrado"}
+        
+        return {
+            "id": doc.id,
+            "title": doc.title,
+            "url": doc.url,
+            "league": doc.league,
+            "content": doc.content,
+            "full_text": doc.get_full_text()
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail=str(e))
 
  

@@ -39,4 +39,23 @@ db.counters.updateOne(
   { upsert: true }
 );
 
+db.createCollection("users", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["email", "password", "read_docs"],
+      properties: {
+        email: { bsonType: "string", description: "User email address" },
+        password: { bsonType: "string", description: "Hashed password" },
+        read_docs: { bsonType: "array", items: { bsonType: "int" }, description: "Array of read document IDs" }
+      },
+      additionalProperties: true
+    }
+  },
+  validationLevel: "moderate",
+  validationAction: "error"
+});
+
+db.users.createIndex({ email: 1 }, { unique: true, name: "uniq_email" });
+
  

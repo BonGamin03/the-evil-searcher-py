@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ArrowLeft, ExternalLink, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import axios from "axios";
 
 interface Article {
   id: string;
@@ -24,13 +25,14 @@ export function Article() {
     const fetchArticle = async () => {
       try {
         const docId = params.id;
-        const response = await fetch(`${API_URL}/article/${docId}`);
+        const userEmail = localStorage.getItem("userEmail");
+        const response = await axios.get(`${API_URL}/article/${docId}`, { params: { userEmail } });
         
-        if (!response.ok) {
+        if (!response.status || response.status !== 200) {
           throw new Error("Error al cargar el artículo");
         }
         
-        const data = await response.json();
+        const data = await response.data;
         setArticle(data);
         setError(null);
       } catch (err) {
