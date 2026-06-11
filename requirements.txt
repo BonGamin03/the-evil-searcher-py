@@ -17,4 +17,4 @@ Scrapy==2.14.1
 sentence-transformers==5.4.1
 spacy==3.8.14
 uvicorn==0.46.0
-passlib[bcrypt]==1.7.4
+bcrypt==4.0.1

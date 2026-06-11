@@ -10,30 +10,34 @@ from domain.local_ranking_calc import LocalRankingCalculator
 from domain.organic_ranking_calc import OrganicRankingCalculator
 from domain.ranking_score import ContentType, RankingScore
 from application.snippet_extractor_use_case import FeaturedSnippetExtractor
+from domain.i_embedding_generator import IEmbeddingGenerator
  
 class RankingOrchestrationUseCase:
      
     def __init__(self,
                  document_processor: IDocumentProcessor,
-                 re_rank_model: IReRankLLMContext):
+                 re_rank_model: IReRankLLMContext,
+                 embedding_gen:IEmbeddingGenerator):
         self.organic_calculator = OrganicRankingCalculator()
         self.local_calculator = LocalRankingCalculator()
         self.snippet_extractor = FeaturedSnippetExtractor(re_rank_model)
         self.document_processor = document_processor
+        self.embedding_gen = embedding_gen
 
     def execute(self,
                 documents: List[Document],
                 query: str,
                 probabilistic_scores: List[Tuple[Document, float]] = None,
-                user_location: str = None) -> List[RankingScore]:
+                user_location: str = None,
+                user_profile_embedding: Optional[list[float]] = None) -> List[RankingScore]:
         
         ranking_scores = []
         prob_scores_dict = {doc.id: score for doc, score in probabilistic_scores} if probabilistic_scores else {}
 
         for document in documents:
-            
+            doc_embedding = self.embedding_gen.document_to_embedding(document) if user_profile_embedding is not None else None
             relevance_score = prob_scores_dict.get(document.id,0)
-            ranking = self.organic_calculator.calculate_organic_rank(document,relevance_score)
+            ranking = self.organic_calculator.calculate_organic_rank(document,relevance_score, doc_embedding, user_profile_embedding)
             local_bonus = self.local_calculator.calculate_local_relevance(document,user_location)
             ranking.final_score += local_bonus
             #snippet, confidence = self.snippet_extractor.extract_featured_snippet(query,document)

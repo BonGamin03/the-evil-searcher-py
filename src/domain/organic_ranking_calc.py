@@ -2,6 +2,8 @@ from datetime import datetime
 import re
 from typing import List, Optional
 
+import numpy as np
+
 from domain.document import Document
 from domain.ranking_score import RankingScore
 
@@ -12,9 +14,10 @@ class OrganicRankingCalculator:
     def __init__(self):
        
         self.weights = {
-            'relevance': 0.50,
-            'authority': 0.30,   
-            'freshness': 0.20    # Activado el factor de frescura
+            "relevance": 0.40,
+            "authority": 0.25,
+            "freshness": 0.15,
+            "personalization": 0.20,
         }
 
         # Base de datos de autoridad por dominio
@@ -28,18 +31,22 @@ class OrganicRankingCalculator:
             
         }
 
-    def calculate_organic_rank(self, document: Document, relevance_score: float) -> RankingScore:
+    def calculate_organic_rank(self, document: Document, relevance_score: float,doc_embedding: Optional[list[float]],user_profile_embedding: Optional[list[float]] = None) -> RankingScore:
         """
         Calculate organic rank combining all factors.
         """
         authority = self.calculate_authority_score(document.url)
         freshness = self.calculate_freshness_score(document)
-
+        if user_profile_embedding is not None:
+            personalization = self._calculate_personalization_score(doc_embedding, user_profile_embedding)
+        else:
+            personalization = 0.0
         # Fórmula ponderada
         final_score = (
             self.weights['relevance'] * (relevance_score / 100 * 100) +  # Normalizar a 0-100
             self.weights['authority'] * authority +
-            self.weights['freshness'] * freshness
+            self.weights['freshness'] * freshness +
+            self.weights["personalization"] * (personalization * 100)
         )
 
         return RankingScore(
@@ -50,6 +57,20 @@ class OrganicRankingCalculator:
             final_score=final_score,
             ranking_type="organic"
         )
+    
+    def _calculate_personalization_score(self,doc_embedding: list[float],user_profile_embedding: list[float],) -> float:
+  
+        u = np.array(user_profile_embedding)
+        d = np.array(doc_embedding)
+        return float(self._cosine_sim(u, d))
+ 
+    @staticmethod
+    def _cosine_sim(a: np.ndarray, b: np.ndarray) -> float:
+        na, nb = np.linalg.norm(a), np.linalg.norm(b)
+        if na == 0 or nb == 0:
+            return 0.0
+        return float(np.dot(a, b) / (na * nb))
+    
     
     def _extract_domain(self, url: str) -> str:
         """Domain from an url"""

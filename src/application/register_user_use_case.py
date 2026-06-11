@@ -1,6 +1,6 @@
 from domain.i_user_repository import IUserRepository
 from domain.user import User
-import passlib.hash as hash
+import bcrypt
 
 class RegisterUserUseCase:
     def __init__(self, user_repo: IUserRepository):
@@ -11,7 +11,7 @@ class RegisterUserUseCase:
         if existing:
             raise ValueError("Email already in use")
         
-        hashed_password = hash.bcrypt.hash(password)
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         user = User(email=email, password=hashed_password, read_docs=[])
         self.user_repo.save(user)
         return user
