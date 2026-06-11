@@ -68,8 +68,8 @@ export function useSearch() {
     setLastQuery(query);
 
     try {
-      
-      const response = await axios.get(`${API_URL}/search?query=${encodeURIComponent(query)}`);
+      const userEmail = localStorage.getItem("userEmail");
+      const response = await axios.get(`${API_URL}/search?query=${encodeURIComponent(query)}`,{ params: { userEmail } });
       console.log("API Response:", response.data);
       setContextResults(response.data); // Guardar globalmente para que persista
     } catch (err) {
