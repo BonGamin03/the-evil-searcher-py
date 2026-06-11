@@ -27,9 +27,15 @@ class UserRepository(IUserRepository):
             {"$set": {"password": user.password, "read_docs": user.read_docs}}
         )
     def update_read_docs(self, user_email: str, doc_id: int) -> None:
-        # Agrega el nuevo doc al final, mantiene solo los últimos 20
+         
         self.collection.update_one(
-            {"email": user_email}, 
+            {"email": user_email},
+            {"$pull": {"read_docs": doc_id}}
+        )
+        
+         
+        self.collection.update_one(
+            {"email": user_email},
             {
                 "$push": {
                     "read_docs": {

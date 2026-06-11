@@ -45,15 +45,16 @@ export function AuthPanel() {
  const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   if (validate()) {
-    const endpoint = mode === "login" ? "/login" : "/register";
+    try {
+      const endpoint = mode === "login" ? "/login" : "/register";
     const response= await axios.post(`${API_URL}${endpoint}`, { email, password });
-    if (response.status === 200) {
-       
-      localStorage.setItem("userEmail", response.data.email); // Guardar identificador
-      navigate("/search");
-    } else {
+  localStorage.setItem("userEmail", response.data.email); // Guardar identificador
+      navigate("/search");  
+  } catch (error) {
       setErrors({ email: "Error en la autenticación" });
     }
+    
+     
   }
 };
 

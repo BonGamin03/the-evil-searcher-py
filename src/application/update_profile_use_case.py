@@ -16,11 +16,11 @@ class UpdateUserProfileUseCase:
         self.doc_repo = doc_repo
         self.vector_repo = vector_repo
         self.user_repo = user_repo
-        self.emdedding_gen = embedding_gen
+        self.embedding_gen = embedding_gen
 
     def execute(self,email: str,query:str) -> None:
-       
-        query_emb = self.emdedding_gen.text_to_embedding(query)
+        print(f"Updating profile for {email} with query: {query}")
+        query_emb = self.embedding_gen.text_to_embedding(query)
         user=self.user_repo.get_by_email(email)
         read_doc_ids = user.read_docs if user and user.read_docs else []
         signal_vector = self._build_signal_vector(query_emb, read_doc_ids)
@@ -31,25 +31,30 @@ class UpdateUserProfileUseCase:
             email=email,
             embedding=signal_vector.tolist(),
         )
-
-    def _build_signal_vector(self,query_emb: list[float],read_doc_ids: list[int],W_QUERY = 0.4,W_DOCS = 0.6) -> Optional[np.ndarray]:
-         
+        print("Finish")
+    def _build_signal_vector(self, query_emb: list[float], read_doc_ids: list[int], W_QUERY=0.4, W_DOCS=0.6) -> Optional[np.ndarray]:
         components = []
         weights = []
+         
         q_emb = np.array(query_emb)
         components.append(q_emb)
         weights.append(W_QUERY)
-        doc_centroid = list(self.vector_repo.get_doc_centroids_batch(read_doc_ids).values())
 
         if read_doc_ids:
-             
-            components.append(doc_centroid)
-            weights.append(W_DOCS)
- 
+            centroids_dict = self.vector_repo.get_doc_centroids_batch(read_doc_ids)
+            if centroids_dict:
+                 
+                doc_vectors = np.array(list(centroids_dict.values()))   
+                doc_centroid = doc_vectors.mean(axis=0)                 
+                components.append(doc_centroid)
+                weights.append(W_DOCS)
 
-        # Si solo hay una señal, normalizar el peso a 1
-        total_weight = sum(weights)
-        combined = sum(w * v for w, v in zip(weights, components)) / total_weight
+        weights_arr = np.array(weights)
+        components_arr = np.array(components)   
+        combined = np.sum(weights_arr[:, np.newaxis] * components_arr, axis=0)
+        total_weight = np.sum(weights_arr)
+        if total_weight > 0:
+            combined = combined / total_weight
 
         norm = np.linalg.norm(combined)
         return combined / norm if norm > 0 else combined
