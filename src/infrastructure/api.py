@@ -66,7 +66,7 @@ user_profile_repo = ChromaUserProfileRepository()
 update_profile_uc = UpdateUserProfileUseCase(user_profile_repo, doc_repo, vec_repo, user_repo, embedding_gen)
 def get_search_use_case():
      show_result= ShowResultsUseCase(doc_repo,inverted_index,doc_proccesor,vec_repo,embedding_gen,re_rank)
-     return SmartSearchUseCase(show_result,get_content,embeddings,rag_gen,inverted_index,doc_proccesor,re_rank,final_ranking, query_expander,user_profile_repo)
+     return SmartSearchUseCase(show_result,get_content,embeddings,rag_gen,inverted_index,doc_proccesor,re_rank,final_ranking, query_expander,user_profile_repo,update_profile_uc)
 def get_scraper_use_case():
      return RunFullScraperUseCase()
 
