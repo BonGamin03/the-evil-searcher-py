@@ -13,6 +13,8 @@ from domain.i_re_rank_llm_context import IReRankLLMContext
 from application.ranking_orchestration_use_case import RankingOrchestrationUseCase
 from domain.ranking_score import RankingScore
 from domain.i_query_expander import IQueryExpander
+from domain.i_profile_repository import IProfileRepository
+from application.update_profile_use_case import UpdateUserProfileUseCase
 
 
 class SmartSearchUseCase:
@@ -26,7 +28,9 @@ class SmartSearchUseCase:
         document_processor: IDocumentProcessor,
         re_rank : IReRankLLMContext,
         doc_ranking : RankingOrchestrationUseCase,
-        query_expander : IQueryExpander
+        query_expander : IQueryExpander,
+        profile_repo: IProfileRepository,
+        update_profile:UpdateUserProfileUseCase
     ):
         self. show_results_use_case = show_results_use_case
         self.get_content_use_case = get_content_use_case
@@ -37,8 +41,10 @@ class SmartSearchUseCase:
         self.re_rank = re_rank
         self.doc_ranking=doc_ranking
         self.query_expander = query_expander
+        self.profile_repo = profile_repo
+        self.update_profile=update_profile
 
-    def execute(self, query: str,user_location=None) -> Tuple[list[RankingScore], str]:
+    def execute(self, query: str,email:str,user_location=None) -> Tuple[list[RankingScore], str]:
 
         expanded_query = self.query_expander.expand_query(query)
         documents, context = self.show_results_use_case.execute(query)
@@ -74,9 +80,15 @@ class SmartSearchUseCase:
                 
         if not a and documents:
             documents = [(x, abs(y)) for x, y in documents]
+        
         rag_response = self.rag_model.generate_response(query, context)
-        last_ranking=self.doc_ranking.execute(document_results,query,probabilistic_scores=documents if not a else None)
-
+        
+        user_embedding=self.profile_repo.get_profile(email)
+        if user_embedding is not None:
+            user_embedding=user_embedding["embedding"]
+        last_ranking=self.doc_ranking.execute(document_results,query,probabilistic_scores=documents if not a else None, user_location=user_location,user_profile_embedding=user_embedding)
+         # 3. Actualizar perfil del usuario en background (no bloquea la respuesta)
+        Thread(target=self.update_profile.execute,args=(email, query),daemon=True,).start()
         return last_ranking, rag_response
     
     def async_updates_inverted_index(self,documents : list[Document]):

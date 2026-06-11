@@ -1,6 +1,6 @@
 from domain.i_user_repository import IUserRepository
 from domain.user import User
-import passlib.hash as hash
+import bcrypt
 
 class LoginUserUseCase:
     def __init__(self, user_repo: IUserRepository):
@@ -11,7 +11,7 @@ class LoginUserUseCase:
         if not user:
             raise ValueError("Invalid email or password")
         
-        if not hash.bcrypt.verify(password, user.password):
+        if not bcrypt.checkpw(password.encode('utf-8'), user.password):
             raise ValueError("Invalid email or password")
             
         return user

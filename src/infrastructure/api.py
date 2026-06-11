@@ -1,4 +1,5 @@
 import os
+ 
 from fastapi import FastAPI , Query , Depends, Path, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -22,7 +23,8 @@ from infrastructure.word2vec_query_expander import Word2VecQueryExpander
 from infrastructure.user_repository import UserRepository
 from application.register_user_use_case import RegisterUserUseCase
 from application.login_user_use_case import LoginUserUseCase
-
+from infrastructure.profile_repository import ChromaUserProfileRepository
+from application.update_profile_use_case import UpdateUserProfileUseCase
 app = FastAPI(title="The Evil Searcher API ")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
@@ -59,11 +61,12 @@ web_searcher=ZenserpSearcher(ZENSERP_API_KEY)
 get_content=GetContentSearchUseCase(web_searcher,doc_repo)
 query_expander=Word2VecQueryExpander(doc_repo,doc_proccesor)
 re_rank=ReRankCTexts()
-final_ranking=RankingOrchestrationUseCase(doc_proccesor,re_rank)
-
+final_ranking=RankingOrchestrationUseCase(doc_proccesor,re_rank,embedding_gen)
+user_profile_repo = ChromaUserProfileRepository()
+update_profile_uc = UpdateUserProfileUseCase(user_profile_repo, doc_repo, vec_repo, user_repo, embedding_gen)
 def get_search_use_case():
      show_result= ShowResultsUseCase(doc_repo,inverted_index,doc_proccesor,vec_repo,embedding_gen,re_rank)
-     return SmartSearchUseCase(show_result,get_content,embeddings,rag_gen,inverted_index,doc_proccesor,re_rank,final_ranking, query_expander)
+     return SmartSearchUseCase(show_result,get_content,embeddings,rag_gen,inverted_index,doc_proccesor,re_rank,final_ranking, query_expander,user_profile_repo)
 def get_scraper_use_case():
      return RunFullScraperUseCase()
 
@@ -84,11 +87,11 @@ def login(user_data: UserCreate):
         raise HTTPException(status_code=401, detail=str(e))
 
 @app.get("/search")
-def search(query: str = Query(..., min_length=1),location: str = Query(None),use_case: SmartSearchUseCase = Depends(get_search_use_case)
+def search(query: str = Query(..., min_length=1),userEmail: str = Query(..., description="Email del usuario"),location: str = Query(None),use_case: SmartSearchUseCase = Depends(get_search_use_case)
 ):
     try:
-        ranked_results, rag = use_case.execute(query, user_location=location)
-        
+        ranked_results, rag = use_case.execute(query, email=userEmail, user_location=location)
+         
         # Convertir RankingScore a diccionario
         results_dict = []
         for ranked in ranked_results:

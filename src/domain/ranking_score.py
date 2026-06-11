@@ -24,3 +24,4 @@ class RankingScore:
     featured_snippet: Optional[str] = None  # Fragmento destacado
     snippet_confidence: float = 0.0  # Confianza del snippet
     content_type: ContentType = ContentType.NEWS
+    personalization_score: float = 0.0  # Similitud coseno perfil_usuario ↔ doc (0-1)
