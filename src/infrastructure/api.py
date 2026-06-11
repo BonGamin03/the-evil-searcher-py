@@ -110,6 +110,7 @@ def search(query: str = Query(..., min_length=1),userEmail: str = Query(..., des
                 "content_type": ranked.content_type.value,
                 "featured_snippet": ranked.featured_snippet,
                 "snippet_confidence": round(ranked.snippet_confidence, 2),
+                "personalization_score": round(ranked.personalization_score, 2)
             }
             results_dict.append(result_item)
         

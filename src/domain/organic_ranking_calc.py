@@ -63,7 +63,8 @@ class OrganicRankingCalculator:
             authority_score=authority,
             freshness_score=freshness,
             final_score=final_score,
-            ranking_type="organic"
+            ranking_type="organic",
+            personalization_score=personalization*100
         )
     
     def _calculate_personalization_score(self,doc_embedding: list[float],user_profile_embedding: list[float],) -> float:

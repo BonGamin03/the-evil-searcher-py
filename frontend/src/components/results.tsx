@@ -16,6 +16,7 @@ interface SearchResult {
   content_type?: string;
   featured_snippet?: string;
   snippet_confidence?: number;
+  personalization_score?: number;
 }
 
 interface ResultsProps {
@@ -90,6 +91,9 @@ function getContentPreview(content: string | string[]): string {
                 <span>Score: {items.final_score.toFixed(1)}</span>
                 {items.authority_score !== undefined && (
                   <span> • Autoridad: {items.authority_score.toFixed(0)}%</span>
+                )}
+                 {items.personalization_score != 0 && (
+                  <span> • Personalización: {items.personalization_score.toFixed(0)}%</span>
                 )}
               </div>
             )}
