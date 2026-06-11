@@ -14,12 +14,18 @@ class OrganicRankingCalculator:
     def __init__(self):
        
         self.weights = {
-            "relevance": 0.40,
-            "authority": 0.25,
-            "freshness": 0.15,
-            "personalization": 0.20,
+            "relevance": 0.50,
+            "authority": 0.30,
+            "freshness": 0.20,
+            "personalization": 0.0,
         }
-
+         
+        self.weights_with_personalization = {
+        "relevance": 0.40,
+        "authority": 0.25,
+        "freshness": 0.15,
+        "personalization": 0.20,
+        }
         # Base de datos de autoridad por dominio
         self.domain_authority = {
             'espn': 95,
@@ -39,14 +45,16 @@ class OrganicRankingCalculator:
         freshness = self.calculate_freshness_score(document)
         if user_profile_embedding is not None:
             personalization = self._calculate_personalization_score(doc_embedding, user_profile_embedding)
+            weights=self.weights_with_personalization
         else:
+            weights=self.weights
             personalization = 0.0
         # Fórmula ponderada
         final_score = (
-            self.weights['relevance'] * (relevance_score / 100 * 100) +  # Normalizar a 0-100
-            self.weights['authority'] * authority +
-            self.weights['freshness'] * freshness +
-            self.weights["personalization"] * (personalization * 100)
+            weights['relevance'] * (relevance_score / 100 * 100) +  # Normalizar a 0-100
+            weights['authority'] * authority +
+            weights['freshness'] * freshness +
+            weights["personalization"] * (personalization * 100)
         )
 
         return RankingScore(
